@@ -104,6 +104,7 @@ Route::middleware([
     Route::get('/members/{member_id}', [Analytics::class, 'members'])->name('member.team.show');
     Route::delete('/member/{id}', [Analytics::class, 'memdelete']);
     Route::put('/member/{id}', [Analytics::class, 'memupdate'])->name('member.update');
+    Route::post('/members', [Analytics::class, 'memstore'])->name('member.store');
     Route::put('/achievement/{id}', [Analytics::class, 'achupdate'])->name('achievements.update');
     Route::post('/achievement', [Analytics::class, 'achstore'])->name('achievements.store');
     Route::post('/events', [Analytics::class, 'eventstore'])->name('events.store');

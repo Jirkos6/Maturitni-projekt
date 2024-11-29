@@ -23,6 +23,16 @@ class Events extends Model
 
     public function teams()
     {
-        return $this->belongsToMany(Teams::class, 'event_team');
+        return $this->belongsToMany(Teams::class, 'event_team', 'event_id', 'team_id');
+    }
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'event_id');
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(Members::class, 'attendances')
+                    ->withPivot('status', 'confirmed_by_parent');
     }
 }

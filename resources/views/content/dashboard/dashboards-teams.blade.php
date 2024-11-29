@@ -164,31 +164,41 @@
 
             <div class="nav-align-top mb-6 mt-6 h-100 d-flex flex-column">
                 <ul class="nav nav-pills mb-4" role="tablist">
-                    <li class="nav-item">
-                        <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home"
-                            aria-selected="true">Kalendář</button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#navs-pills-top-profile" aria-controls="navs-pills-top-profile"
-                            aria-selected="false">Přehled</button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#navs-pills-top-messages" aria-controls="navs-pills-top-messages"
-                            aria-selected="false">Členové</button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#navs-pills-top-presence" aria-controls="navs-pills-top-presence"
-                            aria-selected="false">Docházka</button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#navs-pills-top-achievements" aria-controls="navs-pills-top-achievements"
-                            aria-selected="false">Odborky</button>
-                    </li>
+                    <a href="#navs-pills-top-home">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                data-bs-target="#navs-pills-top-home" aria-controls="navs-pills-top-home"
+                                aria-selected="true">Kalendář</button>
+                        </li>
+                    </a>
+                    <a href="#navs-pills-top-profile">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                data-bs-target="#navs-pills-top-profile" aria-controls="navs-pills-top-profile"
+                                aria-selected="false">Přehled</button>
+                        </li>
+                    </a>
+                    <a href="#navs-pills-top-messages">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                data-bs-target="#navs-pills-top-messages" aria-controls="navs-pills-top-messages"
+                                aria-selected="false">Členové</button>
+                        </li>
+                    </a>
+                    <a href="#navs-pills-top-presence">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                data-bs-target="#navs-pills-top-presence" aria-controls="navs-pills-top-presence"
+                                aria-selected="false">Docházka</button>
+                        </li>
+                    </a>
+                    <a href="#navs-pills-top-achievements">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                data-bs-target="#navs-pills-top-achievements" aria-controls="navs-pills-top-achievements"
+                                aria-selected="false">Odborky</button>
+                        </li>
+                    </a>
                 </ul>
 
                 <div class="tab-content flex-grow-0.3">
@@ -269,6 +279,10 @@
 
 
                     <div class="tab-pane fade h-100" id="navs-pills-top-messages" role="tabpanel">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#editMemberModal">
+                            Přidat člena
+                        </button>
                         @if (null !== Teams::count())
                             <h3 class="text-center text-primary mb-10">Počet členů ({{ $memberCount }})</h3>
                             <div class="card">
@@ -298,20 +312,31 @@
                                                         <div class="dropdown">
                                                             <button type="button"
                                                                 class="btn p-0 dropdown-toggle hide-arrow"
-                                                                data-bs-toggle="dropdown"><i
-                                                                    class="ri-more-2-line"></i></button>
+                                                                data-bs-toggle="dropdown">
+                                                                <i class="ri-more-2-line"></i>
+                                                            </button>
                                                             <div class="dropdown-menu">
-                                                                <a class="dropdown-item" href=""><i
-                                                                        class="ri-pencil-line me-1"></i>Editovat</a>
+
+
                                                                 <a class="dropdown-item"
-                                                                    href="/member/{{ $item->id }}"><i
-                                                                        class="ri-delete-bin-6-line me-1"></i>Smazat</a>
-                                                                <a class="dropdown-item"
-                                                                    href="/members/{{ $item->id }}"><i
-                                                                        class="ri-information-line me-1"></i>Zobrazit</a>
+                                                                    href="/members/{{ $item->id }}">
+                                                                    <i class="ri-information-line "></i>Zobrazit
+                                                                </a>
+                                                                <a class="">
+                                                                    <form action="/member/{{ $item->id }}"
+                                                                        method="POST"
+                                                                        onsubmit="return confirm('Opravdu chcete smazat tohoto člena?');">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="dropdown-item">
+                                                                            <i class="ri-delete-bin-6-line"></i>Smazat
+                                                                        </button>
+                                                                    </form>
+                                                                </a>
                                                             </div>
                                                         </div>
                                                     </td>
+
 
                                                 </tr>
                                             @endforeach
@@ -326,6 +351,35 @@
                     </div>
                     <div class="tab-pane fade h-100" id="navs-pills-top-presence" role="tabpanel">
                         <div class="row mb-12 g-6">
+                            @foreach ($attendance as $event)
+                                <div class="col-md-12 mb-4">
+                                    <h5>{{ $event->title }}</h5>
+                                    <p>{{ $event->start_date }}</p>
+
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Docházka</th>
+                                                <th>Počet</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Přítomno</td>
+                                                <td>{{ $event->attendances_count }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Omluveno</td>
+                                                <td>{{ $event->excused_count }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Neomluveno</td>
+                                                <td>{{ $event->unexcused_count }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
@@ -484,149 +538,123 @@
 
 
         </div>
-        <div class="modal fade" id="smallModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-sm" role="document">
+        <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel2">Přidání akce</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                        <h5 class="modal-title" id="editMemberModalLabel">Přidat</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- Title -->
-                        <form action="{{ route('events.store') }}" method="POST" id="eventForm">
+                        <form action="{{ route('member.store') }}" method="POST" id="createMemberForm">
                             @csrf
-                            <div class="row">
-                                <div class="col mb-6 mt-2">
-                                    <div class="form-floating form-floating-outline">
-                                        <input type="text" id="titleInput" name="title" class="form-control"
-                                            placeholder="Napište název akce" required
-                                            oninvalid="this.setCustomValidity('Prosím, zadejte název akce!')"
-                                            oninput="this.setCustomValidity('')">
-                                        <label for="titleInput">Název akce</label>
-                                    </div>
-                                </div>
-                            </div>
+                            @method('POST')
 
-                            <!-- Description -->
-                            <div class="row">
-                                <div class="col mb-6 mt-2">
-                                    <div class="form-floating form-floating-outline">
-                                        <input type="text" id="descriptionInput" name="description"
-                                            class="form-control" placeholder="Napište popis akce" required
-                                            oninvalid="this.setCustomValidity('Prosím, zadejte popis akce!')"
-                                            oninput="this.setCustomValidity('')">
-                                        <label for="descriptionInput">Popis akce</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Start date and time -->
-                            <div class="row g-4">
-                                <div class="col mb-2">
-                                    <div class="form-floating form-floating-outline">
-                                        <input type="date" class="form-control" name="start_date" id="startDateInput"
-                                            required
-                                            oninvalid="this.setCustomValidity('Prosím, vyberte datum začátku akce!')"
-                                            oninput="this.setCustomValidity('')">
-                                        <label for="startDateInput">Začátek</label>
-                                    </div>
-                                </div>
-                                <div class="col mb-2">
-                                    <div class="form-floating form-floating-outline">
-                                        <input type="time" class="form-control" name="start_time" id="startTimeInput"
-                                            required
-                                            oninvalid="this.setCustomValidity('Prosím, vyberte čas začátku akce!')"
-                                            oninput="this.setCustomValidity('')">
-                                        <label for="startTimeInput">*Čas</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- End date and time -->
-                            <div class="row g-4">
-                                <div class="col mb-2">
-                                    <div class="form-floating form-floating-outline">
-                                        <input type="date" class="form-control" name="end_date" id="endDateInput"
-                                            required
-                                            oninvalid="this.setCustomValidity('Prosím, vyberte datum konce akce!')"
-                                            oninput="this.setCustomValidity('')">
-                                        <label for="endDateInput">Konec</label>
-                                    </div>
-                                </div>
-                                <div class="col mb-2">
-                                    <div class="form-floating form-floating-outline">
-                                        <input type="time" class="form-control" name="end_time" id="endTimeInput"
-                                            required oninvalid="this.setCustomValidity('Prosím, vyberte čas konce akce!')"
-                                            oninput="this.setCustomValidity('')">
-                                        <label for="endTimeInput">*Čas</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Recurring dropdown -->
                             <div class="mb-3">
-                                <label for="recurringSelect" class="form-label">Opakování události</label>
-                                <select class="form-select" name="recurrence" id="recurringSelect" required>
-                                    <option value="none" selected>Neopakuje se</option>
-                                    <option value="daily">Denně</option>
-                                    <option value="weekly">Týdně</option>
+                                <label for="name" class="form-label">Jméno</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="surname" class="form-label">Příjmení</label>
+                                <input type="text" class="form-control" id="surname" name="surname" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="age" class="form-label">Věk</label>
+                                <input type="number" class="form-control" id="age" name="age">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="shirt_size_id" class="form-label">Velikost trika</label>
+                                <select class="form-select" id="shirt_size_id" name="shirt_size_id">
+                                    <option value="">Vyberte velikost</option>
+                                    @foreach ($shirt_sizes as $size)
+                                        <option value="{{ $size->id }}">{{ $size->size }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
-                            <div id="repeatOptions" class="d-none">
-                                <div class="row g-4">
-                                    <div class="col mb-2">
-                                        <div class="form-floating form-floating-outline">
-                                            <input type="number" class="form-control" name="interval"
-                                                id="repeatInterval" min="1"
-                                                placeholder="Počet vynechaných dnů/týdnů mezi opakováním"
-                                                oninvalid="this.setCustomValidity('Prosím, zadejte interval opakování!')"
-                                                oninput="this.setCustomValidity('')">
-                                            <label for="repeatInterval">Interval</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row g-4">
-                                    <div class="col mb-2">
-                                        <div class="form-floating form-floating-outline">
-                                            <input type="number" class="form-control" name="repeat_count"
-                                                id="repeatCount" min="1" placeholder="Počet opakování"
-                                                oninvalid="this.setCustomValidity('Prosím, zadejte počet opakování!')"
-                                                oninput="this.setCustomValidity('')">
-                                            <label for="repeatCount">Počet opakování</label>
-                                        </div>
-                                    </div>
-                                    <div class="col mb-2">
-                                        <div class="form-floating form-floating-outline">
-                                            <input type="date" class="form-control" name="repeat_end_date"
-                                                id="repeatEndDate"
-                                                oninvalid="this.setCustomValidity('Prosím, zadejte konec opakování!')"
-                                                oninput="this.setCustomValidity('')">
-                                            <label for="repeatEndDate">Konec opakování</label>
-                                            <input type="text" hidden name="team_id" id="team_id"
-                                                value="{{ $id1 }}">
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="nickname" class="form-label">Přezdívka</label>
+                                <input type="text" class="form-control" id="nickname" name="nickname">
                             </div>
 
-                            <div id="previewResult" class="d-none">
-                                <h5>Událost bude probíhat na těchto datech:</h5>
-                                <ul id="previewDates"></ul>
-                                <p id="otherDatesText"></p>
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">Telefon</label>
+                                <input type="text" class="form-control" id="telephone" name="telephone">
                             </div>
 
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
-                        <button class="btn btn-primary" id="saveEventButton" onclick="submitForm()"
-                            type="submit">Uložit akci</button>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="mother_name" class="form-label">Jméno matky</label>
+                                <input type="text" class="form-control" id="mother_name" name="mother_name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="mother_surname" class="form-label">Příjmení matky</label>
+                                <input type="text" class="form-control" id="mother_surname" name="mother_surname">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="mother_telephone" class="form-label">Telefon matky</label>
+                                <input type="text" class="form-control" id="mother_telephone"
+                                    name="mother_telephone">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="mother_email" class="form-label">Email matky</label>
+                                <input type="email" class="form-control" id="mother_email" name="mother_email">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="father_name" class="form-label">Jméno otce</label>
+                                <input type="text" class="form-control" id="father_name" name="father_name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="father_surname" class="form-label">Příjmení otce</label>
+                                <input type="text" class="form-control" id="father_surname" name="father_surname">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="father_telephone" class="form-label">Telefon otce</label>
+                                <input type="text" class="form-control" id="father_telephone"
+                                    name="father_telephone">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="father_email" class="form-label">Email otce</label>
+                                <input type="email" class="form-control" id="father_email" name="father_email">
+                                <input type="text" value="{{ $id1 }}" id="team_id" name="team_id" hidden>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                                <button type="submit" class="btn btn-primary">Uložit</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-        </form>
+
         <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const hash = window.location.hash;
+                if (hash) {
+                    const targetTab = document.querySelector(`button[data-bs-target="${hash}"]`);
+                    if (targetTab) {
+                        const tab = new bootstrap.Tab(targetTab);
+                        tab.show();
+                    }
+                }
+            });
             const recurringSelect = document.getElementById('recurringSelect');
             const repeatOptions = document.getElementById('repeatOptions');
             const repeatCount = document.getElementById('repeatCount');
