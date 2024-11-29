@@ -1,7 +1,27 @@
 import './bootstrap';
-/*
-  Add custom scripts here
-*/
+
+import { Calendar } from '@fullcalendar/core';
+import multiMonthPlugin from '@fullcalendar/multimonth';
+import rrulePlugin from '@fullcalendar/rrule';
+
+
+window.Calendar = Calendar;
+window.multiMonthPlugin = multiMonthPlugin;
+window.rrulePlugin = rrulePlugin;
+
+import interaction from '@fullcalendar/interaction';
+window.interaction = interaction;
+
+import dayGridPlugin from '@fullcalendar/daygrid';
+window.dayGridPlugin = dayGridPlugin;
+
+import timeGridPlugin from '@fullcalendar/timegrid';
+window.timeGridPlugin = timeGridPlugin;
+
+import listPlugin from '@fullcalendar/list';
+window.listPlugin = listPlugin;
+
+
 import.meta.glob([
   '../assets/img/**',
   // '../assets/json/**',

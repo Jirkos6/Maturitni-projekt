@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'variables';
+@import 'calendar.css';
+
+
 [x-cloak] {
     display: none;
 }
