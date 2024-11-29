@@ -225,8 +225,9 @@
                                             <p class="card-text text-muted">
                                                 {{ $nextevent->description }}
                                                 <br>
-                                                <strong>Datum:</strong><br>
+                                                <strong>Začátek:</strong><br>
                                                 {{ \Carbon\Carbon::parse($nextevent->start)->format('d.m.Y h:i:s') }}<br>
+                                                <strong>Konec:</strong><br>
                                                 {{ \Carbon\Carbon::parse($nextevent->end)->format('d.m.Y h:i:s') }}
                                             </p>
                                         </div>

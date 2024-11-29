@@ -87,10 +87,13 @@ class Analytics extends Controller
         'events.description',
         'events.id',
         'events.start_date as start',
-        'events.end_date as end')->orderBy('start','desc')->first();
-        if ($nextevent && \Carbon\Carbon::parse($nextevent->start)->isPast()) {
+        'events.end_date as end')->orderBy('events.start_date','desc')->first();
+    
+        if (\Carbon\Carbon::parse($nextevent->start)->isPast()) {
         $nextevent = null;
         }
+      
+      
           $transformedEvents = $events->map(function ($event) {
             if ($event->recurring == 1) {
                 $rrule = [
