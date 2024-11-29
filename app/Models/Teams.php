@@ -19,7 +19,6 @@ class Teams extends Model
     }
     public function events()
     {
-        return $this->belongsToMany(Events::class, 'event_team');
+        return $this->belongsToMany(Events::class, 'event_team', 'team_id', 'event_id');
     }
-    
 }

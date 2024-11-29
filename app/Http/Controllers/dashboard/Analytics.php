@@ -13,6 +13,7 @@ use App\Models\EventTeam;
 use App\Models\Achievements;
 use App\Models\ReccuringEvents;
 use App\Models\ShirtSizes;
+use App\Models\Attendance;
 use Illuminate\Support\Str;
 class Analytics extends Controller
 {
@@ -52,11 +53,70 @@ class Analytics extends Controller
           return redirect('/');
       }
   }
+  public function memstore(Request $request)
+  {
+      try {
+        $validated = $request->validate([
+          'name' => 'required|string|max:255',
+          'surname' => 'required|string|max:255',
+          'age' => 'nullable|integer', 
+          'shirt_size_id' => 'nullable|exists:shirt_sizes,id',
+          'nickname' => 'nullable|string|max:255',
+          'telephone' => 'nullable|string|max:255',
+          'email' => 'nullable|email|max:255',
+          'mother_name' => 'nullable|string|max:255',
+          'mother_surname' => 'nullable|string|max:255',
+          'mother_telephone' => 'nullable|string|max:255',
+          'mother_email' => 'nullable|email|max:255',
+          'father_name' => 'nullable|string|max:255',
+          'father_surname' => 'nullable|string|max:255',
+          'father_telephone' => 'nullable|string|max:255',
+          'father_email' => 'nullable|email|max:255',
+          'team_id' => 'required|exists:teams,id',
+        ]);
+          $member = new Members;
+          $member->name = $validated['name'];
+          $member->surname = $validated['surname'];
+          $member->age = $validated['age'];
+          $member->shirt_size_id = $validated['shirt_size_id'];
+          $member->nickname = $validated['nickname'];
+          $member->telephone = $validated['telephone'];
+          $member->email = $validated['email'];
+          $member->mother_name = $validated['mother_name'];
+          $member->mother_surname = $validated['mother_surname'];
+          $member->mother_telephone = $validated['mother_telephone'];
+          $member->mother_email = $validated['mother_email'];
+          $member->father_name = $validated['father_name'];
+          $member->father_surname = $validated['father_surname'];
+          $member->father_telephone = $validated['father_telephone'];
+          $member->father_email = $validated['father_email'];
+          $member->save(); 
+          $team_id = $validated['team_id'];
+          $member->teams()->attach($team_id);
+          $request->session()->flash('success', "Člen $member->name byl úspěšně přidán!");
+          return redirect()->back()->withFragment('#navs-pills-top-messages');
+      } catch (\Exception $e) {
+          $request->session()->flash('error', "Nastala chyba při přidávání člena! " . $e->getMessage());
+          return redirect()->back()->withFragment('#navs-pills-top-messages');
+      }
+  }
   public function teams($id)
   {
 
       $data = Teams::where('id', $id)->get(); 
       $id1 = $id;
+      $attendance = Events::withCount([
+        'attendances as present_count' => function ($query) {
+            $query->where('status', 'present');
+        },
+        'attendances as excused_count' => function ($query) {
+            $query->where('status', 'excused');
+        },
+        'attendances as unexcused_count' => function ($query) {
+            $query->where('status', 'unexcused');
+        }
+    ])->get();
+ 
       $members = Teams::with('members')->where('id', $id)->get()->pluck('members')->flatten();
       $events = Teams::join('event_team', 'teams.id', '=', 'event_team.team_id')
       ->join('events', 'events.id', '=', 'event_team.event_id')
@@ -128,12 +188,8 @@ class Analytics extends Controller
         });
       $memberCount = Teams::find($id)->members()->count();
       $events = $transformedEvents->toJson();
-      var_dump($id1);
-      return view('content.dashboard.dashboards-teams', compact('events', 'data','nextevent','memberCount','members','presence','achievements','id1'));
-  }
-  public function eventCreate(Request $request) {
-  $event = new Events;
-
+      $shirt_sizes = ShirtSizes::all();
+      return view('content.dashboard.dashboards-teams', compact('events', 'data','nextevent','memberCount','members','presence','achievements','id1','shirt_sizes','attendance'));
   }
 
   public function achdelete($id) {
@@ -150,10 +206,10 @@ class Analytics extends Controller
       $member = Members::findOrFail($id);
       if ($member) {
       $member->delete();
-      return redirect('/')->with('success', 'Položka byla úspěšně smazána!');   
+      return redirect()->back()->with('success', 'Položka byla úspěšně smazána!')->withFragment('#navs-pills-top-messages'); 
       }
       else {
-      return redirect('/')->with('error', 'Položka neexistuje!');   
+      return redirect()->back()->with('error', 'Položka neexistuje!')->withFragment('#navs-pills-top-messages');
       }
 
   }
@@ -194,9 +250,9 @@ public function memupdate(Request $request, $id)
     ]);
     $member = Members::findOrFail($id);
     $member->update($validated);
-    return redirect()->back()->with('success', 'Člen byl úspěšně upraven!');
+    return redirect()->back()->with('success', 'Člen byl úspěšně upraven!')->withFragment('#navs-pills-top-messages');
   } catch (\Exception $e) {
-    return redirect()->back()->with('error', "Nastala chyba při editaci!" . $e->getMessage());
+    return redirect()->back()->with('error', "Nastala chyba při editaci!" . $e->getMessage())->withFragment('#navs-pills-top-messages');
   }
   }
 
@@ -221,10 +277,10 @@ public function memupdate(Request $request, $id)
 
       $achievement->save();
 
-      return redirect()->back()->with('success', 'Odborka byla úspěšně upravena!');
+      return redirect()->back()->with('success', 'Odborka byla úspěšně upravena!')->withFragment('#navs-pills-top-achievements');
     }
     catch(\Exception $e) {
-      return redirect()->back()->with('error', "Nastala chyba při editaci!" . $e->getMessage());
+      return redirect()->back()->with('error', "Nastala chyba při editaci!" . $e->getMessage())->withFragment('#navs-pills-top-achievements');
     }
   }
   public function achstore(Request $request)
@@ -247,19 +303,22 @@ public function memupdate(Request $request, $id)
       }
 
       $achievement->save();
-      return redirect()->back()->with('success', "Přidání proběhlo úspěšně!" . $e->getMessage());
+      return redirect()->back()->with('success', "Přidání proběhlo úspěšně!")->withFragment('#navs-pills-top-achievements');
     }
       catch(\Exception $e) {
-        return redirect()->back()->with('error', "Nastala chyba při přidávání!" . $e->getMessage());
+        return redirect()->back()->with('error', "Nastala chyba při přidávání!" . $e->getMessage())->withFragment('#navs-pills-top-achievements');
       }
 }
 
 public function eventstore(Request $request)
 {
     try {
-      if ($request->has('daily') || $request->has('weekly')) {
-        $request->merge(['is_recurring' => 1]);
-    }
+        // Check for recurrence flags
+        if ($request->has('daily') || $request->has('weekly')) {
+            $request->merge(['is_recurring' => 1]);
+        }
+
+        // Validate incoming request
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -271,12 +330,12 @@ public function eventstore(Request $request)
             'recurrence.end_date' => 'nullable|date|after:start_date',
             'recurrence.interval' => 'nullable|integer|min:1',
             'recurrence.repeat_count' => 'nullable|integer|min:1',
-            'team_id' => 'required|exists:teams,id', 
+            'team_id' => 'required|exists:teams,id',
         ]);
+
         if ($request->input('recurrence.repeat_count') && $request->input('recurrence.end_date')) {
-            throw new \Exception('Event cannot use both repeat count and recurrence end date at the same time.');
+            throw new \Exception('Událost nemůže mít počet opakování a konec opakování zároveň.');
         }
-        
         $event = new Events();
         $event->title = $request->input('title');
         $event->description = $request->input('description');
@@ -284,7 +343,6 @@ public function eventstore(Request $request)
         $event->end_date = $request->input('end_date');
         $event->is_recurring = $request->input('is_recurring');
         $event->save();
-
         if ($request->input('is_recurring')) {
             $recurringEvent = new RecurringEvent();
             $recurringEvent->event_id = $event->id;
@@ -298,13 +356,23 @@ public function eventstore(Request $request)
         }
         $team = Teams::findOrFail($request->input('team_id'));
         $team->events()->attach($event);
+        $members = $team->members; 
+        foreach ($members as $member) {
+            Attendance::create([
+                'event_id' => $event->id,
+                'member_id' => $member->id,
+                'status' => 'unexcused',  
+                'confirmed_by_parent' => null, 
+            ]);
+        }
+        $request->session()->flash('success', "Událost '{$event->title}' byla úspěšně přidána a přiřazena k týmu!");
 
-        $request->session()->flash('success', "Událost '$event->title' byla úspěšně přidána a přiřazena k týmu!");
-        return redirect('/');
+        return redirect()->back();
     } catch (\Exception $e) {
         $request->session()->flash('error', "Nastala chyba při přidávání události! " . $e->getMessage());
-        return redirect('/');
+        return redirect()->back();
     }
 }
+
 
 }
