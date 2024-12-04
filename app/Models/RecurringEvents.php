@@ -4,9 +4,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class ReccuringEvents extends Model
+class RecurringEvents extends Model
 {
-    protected $table = 'reccuring_events'; 
+    protected $table = 'recurring_events'; 
     protected $fillable = [
         'event_id',
         'frequency',

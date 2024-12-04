@@ -5,25 +5,16 @@ namespace App\Http\Controllers\dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Teams;
-use Google\Client;
-use Google\Service\Calendar;
 use App\Models\Events;
 use App\Models\Members;
 use App\Models\EventTeam;
 use App\Models\Achievements;
-use App\Models\ReccuringEvents;
+use App\Models\RecurringEvents;
 use App\Models\ShirtSizes;
 use App\Models\Attendance;
 use Illuminate\Support\Str;
 class Analytics extends Controller
 {
-  private $authKey;
-  private $translator;
-  public function __construct() {
-
- $this->authKey = env('DEEPL_AUTH_KEY', 'default_value');
- $this->translator = new \DeepL\Translator($this->authKey);
-  }
   private function convertDayOfWeek($dayOfWeek)
 {
     $days = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
@@ -148,12 +139,12 @@ class Analytics extends Controller
         'events.id',
         'events.start_date as start',
         'events.end_date as end')->orderBy('events.start_date','desc')->first();
-    
+        if ($nextevent) {
         if (\Carbon\Carbon::parse($nextevent->start)->isPast()) {
         $nextevent = null;
         }
       
-      
+        }
           $transformedEvents = $events->map(function ($event) {
             if ($event->recurring == 1) {
                 $rrule = [
@@ -313,22 +304,19 @@ public function memupdate(Request $request, $id)
 public function eventstore(Request $request)
 {
     try {
-        // Check for recurrence flags
         if ($request->has('daily') || $request->has('weekly')) {
             $request->merge(['is_recurring' => 1]);
         }
-
-        // Validate incoming request
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'description' => 'nullable|string',
+            'start_datetime' => 'required|date',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
             'recurrence.frequency' => 'required_if:is_recurring,1|in:daily,weekly',
             'recurrence.day_of_week' => 'nullable|string',
             'recurrence.day_of_month' => 'nullable|string',
             'recurrence.end_date' => 'nullable|date|after:start_date',
-            'recurrence.interval' => 'nullable|integer|min:1',
+            'recurrence.interval' => 'nullable|integer',
             'recurrence.repeat_count' => 'nullable|integer|min:1',
             'team_id' => 'required|exists:teams,id',
         ]);
@@ -339,12 +327,12 @@ public function eventstore(Request $request)
         $event = new Events();
         $event->title = $request->input('title');
         $event->description = $request->input('description');
-        $event->start_date = $request->input('start_date');
-        $event->end_date = $request->input('end_date');
+        $event->start_date = $request->input('start_datetime');
+        $event->end_date = $request->input('end_datetime');
         $event->is_recurring = $request->input('is_recurring');
         $event->save();
         if ($request->input('is_recurring')) {
-            $recurringEvent = new RecurringEvent();
+            $recurringEvent = new RecurringEvents();
             $recurringEvent->event_id = $event->id;
             $recurringEvent->frequency = $request->input('recurrence.frequency');
             $recurringEvent->day_of_week = $request->input('recurrence.day_of_week');
@@ -372,7 +360,11 @@ public function eventstore(Request $request)
         $request->session()->flash('error', "Nastala chyba při přidávání události! " . $e->getMessage());
         return redirect()->back();
     }
+  
 }
-
+public function eventview($id) {
+$data = Events::find($id);
+return view ('content.dashboard.dashboards-events',compact('data'));
+}
 
 }
