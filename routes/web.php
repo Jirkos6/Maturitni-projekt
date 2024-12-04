@@ -97,6 +97,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/', [Analytics::class, 'index'])->name('dashboard-analytics');
+    Route::get('/events/{id}', [Analytics::class, 'eventview'])->name('dashboard-events');
     Route::get('/account/settings', [AccountSettingsAccount::class, 'index'])->name('pages-account-settings-account');
     Route::get('/teams/{id}', [Analytics::class, 'teams'])->name('dashboard-teams');
     Route::delete('/achievement/{id}', [Analytics::class, 'achdelete']);

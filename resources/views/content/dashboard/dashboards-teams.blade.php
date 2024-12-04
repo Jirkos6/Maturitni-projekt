@@ -7,20 +7,13 @@
 @extends('layouts/contentNavbarLayout')
 
 @section('title', 'Oddíl ' . $sectionName)
-<style>
-    .modal-backdrop {
-        display: none !important;
-    }
-</style>
 @section('content')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.umd.min.js"></script>
-    <link href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css" rel="stylesheet">
     @vite(['resources/js/app.js'])
     @use('App\Models\Teams')
     @use('App\Models\Achievements')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
             var calendarEl = document.getElementById('calendar');
             var l13 = {
                 code: 'cs',
@@ -49,6 +42,7 @@
                 plugins: [window.interaction, window.dayGridPlugin, window.timeGridPlugin, window
                     .listPlugin, window.multiMonthPlugin, window.rrulePlugin
                 ],
+                selectable: 'true',
                 initialView: 'dayGridMonth',
                 locale: l13,
                 events: {!! $events !!},
@@ -100,43 +94,48 @@
                         }
                     }
                 },
-                eventMouseEnter: function(info) {
-                    var startDate = new Date(info.event.start);
-                    var endDate = info.event.end ? new Date(info.event.end) : null;
-                    startDate.setHours(startDate.getHours() - 1);
-                    if (endDate) endDate.setHours(endDate.getHours() - 1);
+                dateClick: function(info) {
 
-                    var formatTime = date => date.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    var tooltipContent = `
-                <strong>${info.event.title}</strong><br>
-                Začátek: ${formatTime(startDate)}<br>
-                Konec: ${endDate ? formatTime(endDate) : ''}<br>
-                Popis: ${info.event.extendedProps.description || ''}
-            `;
-                    tippy(info.el, {
-                        content: tooltipContent,
-                        allowHTML: true,
-                        placement: 'top',
-                        trigger: 'mouseenter',
-                        hideOnClick: false,
-                        arrow: true,
-                    });
+                },
+                eventClick: function(info) {
+                    window.location.href = "/events/" + info.event.id;
+                },
+                eventMouseEnter: function(info) {
+                    info.el.style.cursor =
+                        'pointer';
+                    info.el.style.backgroundColor = '#28a745';
+                    info.el.style.borderColor = '#218838';
+                    info.el.style.transform = 'scale(1.01)';
+                    info.el.style.boxShadow =
+                        '0 0 15px rgba(40, 167, 69, 0.5)';
+                    info.el.style.transition = 'all 0.2s ease-in-out';
+
                 },
                 eventMouseLeave: function(info) {
-                    if (info.el._tooltipInstance) {
-                        info.el._tooltipInstance.destroy();
-                        delete info.el._tooltipInstance;
-                    }
+                    info.el.style.cursor = 'default';
+                    info.el.style.backgroundColor = '';
+                    info.el.style.borderColor = '';
+                    info.el.style.color = '';
+                    info.el.style.transform = '';
+                    info.el.style.boxShadow = '';
+                    info.el.style.transition = '';
                 },
             });
 
             calendar.render();
         });
     </script>
+    <style>
+        #calendar {
+            max-width: 100%;
+            margin: 1px auto;
+        }
 
+
+        .modal-backdrop {
+            display: none !important;
+        }
+    </style>
 
 
 
@@ -203,10 +202,10 @@
 
                 <div class="tab-content flex-grow-0.3">
                     <div class="tab-pane fade show active h-100" id="navs-pills-top-home" role="tabpanel">
-
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#smallModal">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
                             Přidání akcí
                         </button>
+
                         <div id="calendar"></div>
                     </div>
 
@@ -241,8 +240,6 @@
                                                 {{ \Carbon\Carbon::parse($nextevent->end)->format('d.m.Y h:i:s') }}
                                             </p>
                                         </div>
-
-                                        <!-- Image Section below title -->
                                         <img class="card-img-bottom img-fluid rounded-3 mb-3"
                                             src="{{ asset('https://img.freepik.com/premium-vector/mentors-little-scouts-tourists-learn-put-up-tent-make-fire-life-nature-skills-kids-expedition-teacher-teaches-children-cook-campfire-splendid-vector-illustration_533410-2617.jpg') }}"
                                             alt="Event Image">
@@ -354,7 +351,7 @@
                             @foreach ($attendance as $event)
                                 <div class="col-md-12 mb-4">
                                     <h5>{{ $event->title }}</h5>
-                                    <p>{{ $event->start_date }}</p>
+                                    <p>{{ $event->start_date }} - {{ $event->end_date }}</p>
 
                                     <table class="table table-bordered">
                                         <thead>
@@ -366,7 +363,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>Přítomno</td>
-                                                <td>{{ $event->attendances_count }}</td>
+                                                <td>{{ $event->present_count }}</td>
                                             </tr>
                                             <tr>
                                                 <td>Omluveno</td>
@@ -442,89 +439,7 @@
                                         </div>
                                     </div>
                                 @endforeach
-                                <div class="modal fade" id="editAchievementModal" tabindex="-1"
-                                    aria-labelledby="editAchievementModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="editAchievementModalLabel">Upravit odborku
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form id="editAchievementForm" method="POST"
-                                                    enctype="multipart/form-data">
-                                                    @csrf
-                                                    @method('PUT')
 
-                                                    <div class="mb-3">
-                                                        <label for="name" class="form-label">Název odborky</label>
-                                                        <input type="text" class="form-control" id="name"
-                                                            name="name" required placeholder="">
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label for="description" class="form-label">Popis odborky</label>
-                                                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label for="image" class="form-label">Obrázek odborky</label>
-                                                        <input type="file" class="form-control" id="image"
-                                                            name="image">
-
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <button type="submit" class="btn btn-primary">Upravit</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal fade" id="addAchievementModal" tabindex="-1"
-                                    aria-labelledby="addAchievementModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="addAchievementModalLabel">Přidat Odborku</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Zavřít"></button>
-                                            </div>
-                                            <form action="{{ route('achievements.store') }}" method="POST"
-                                                enctype="multipart/form-data">
-                                                @csrf
-                                                <div class="modal-body">
-
-                                                    <div class="mb-3">
-                                                        <label for="name" class="form-label">Název Odborky</label>
-                                                        <input type="text" class="form-control" id="name"
-                                                            name="name" required>
-                                                    </div>
-
-
-                                                    <div class="mb-3">
-                                                        <label for="description" class="form-label">Popis Odborky</label>
-                                                        <textarea class="form-control" id="description" name="description"></textarea>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label for="image" class="form-label">Obrázek</label>
-                                                        <input type="file" class="form-control" id="image"
-                                                            name="image" accept="image/*">
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Zavřít</button>
-                                                    <button type="submit" class="btn btn-primary">Přidat Odborku</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
 
                         </div>
                     </div>
@@ -551,88 +466,102 @@
                             @csrf
                             @method('POST')
 
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Jméno</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Jméno</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="surname" class="form-label">Příjmení</label>
+                                    <input type="text" class="form-control" id="surname" name="surname" required>
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="surname" class="form-label">Příjmení</label>
-                                <input type="text" class="form-control" id="surname" name="surname" required>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="age" class="form-label">Věk</label>
+                                    <input type="number" class="form-control" id="age" name="age">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="shirt_size_id" class="form-label">Velikost trika</label>
+                                    <select class="form-select" id="shirt_size_id" name="shirt_size_id">
+                                        <option value="">Vyberte velikost</option>
+                                        @foreach ($shirt_sizes as $size)
+                                            <option value="{{ $size->id }}">{{ $size->size }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="age" class="form-label">Věk</label>
-                                <input type="number" class="form-control" id="age" name="age">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nickname" class="form-label">Přezdívka</label>
+                                    <input type="text" class="form-control" id="nickname" name="nickname">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="telephone" class="form-label">Telefon</label>
+                                    <input type="text" class="form-control" id="telephone" name="telephone">
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="shirt_size_id" class="form-label">Velikost trika</label>
-                                <select class="form-select" id="shirt_size_id" name="shirt_size_id">
-                                    <option value="">Vyberte velikost</option>
-                                    @foreach ($shirt_sizes as $size)
-                                        <option value="{{ $size->id }}">{{ $size->size }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email">
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="nickname" class="form-label">Přezdívka</label>
-                                <input type="text" class="form-control" id="nickname" name="nickname">
+                            <h6 class="mt-4">Kontakt na matku</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="mother_name" class="form-label">Jméno matky</label>
+                                    <input type="text" class="form-control" id="mother_name" name="mother_name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="mother_surname" class="form-label">Příjmení matky</label>
+                                    <input type="text" class="form-control" id="mother_surname"
+                                        name="mother_surname">
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="telephone" class="form-label">Telefon</label>
-                                <input type="text" class="form-control" id="telephone" name="telephone">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="mother_telephone" class="form-label">Telefon matky</label>
+                                    <input type="text" class="form-control" id="mother_telephone"
+                                        name="mother_telephone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="mother_email" class="form-label">Email matky</label>
+                                    <input type="email" class="form-control" id="mother_email" name="mother_email">
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email">
+                            <h6 class="mt-4">Kontakt na otce</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="father_name" class="form-label">Jméno otce</label>
+                                    <input type="text" class="form-control" id="father_name" name="father_name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="father_surname" class="form-label">Příjmení otce</label>
+                                    <input type="text" class="form-control" id="father_surname"
+                                        name="father_surname">
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="mother_name" class="form-label">Jméno matky</label>
-                                <input type="text" class="form-control" id="mother_name" name="mother_name">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="father_telephone" class="form-label">Telefon otce</label>
+                                    <input type="text" class="form-control" id="father_telephone"
+                                        name="father_telephone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="father_email" class="form-label">Email otce</label>
+                                    <input type="email" class="form-control" id="father_email" name="father_email">
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="mother_surname" class="form-label">Příjmení matky</label>
-                                <input type="text" class="form-control" id="mother_surname" name="mother_surname">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="mother_telephone" class="form-label">Telefon matky</label>
-                                <input type="text" class="form-control" id="mother_telephone"
-                                    name="mother_telephone">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="mother_email" class="form-label">Email matky</label>
-                                <input type="email" class="form-control" id="mother_email" name="mother_email">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="father_name" class="form-label">Jméno otce</label>
-                                <input type="text" class="form-control" id="father_name" name="father_name">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="father_surname" class="form-label">Příjmení otce</label>
-                                <input type="text" class="form-control" id="father_surname" name="father_surname">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="father_telephone" class="form-label">Telefon otce</label>
-                                <input type="text" class="form-control" id="father_telephone"
-                                    name="father_telephone">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="father_email" class="form-label">Email otce</label>
-                                <input type="email" class="form-control" id="father_email" name="father_email">
-                                <input type="text" value="{{ $id1 }}" id="team_id" name="team_id" hidden>
-                            </div>
+                            <input type="text" value="{{ $id1 }}" id="team_id" name="team_id" hidden>
 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
@@ -644,83 +573,215 @@
             </div>
         </div>
 
+        <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="eventModalLabel">Přidat událost</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="eventForm" action="{{ route('events.store') }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Název události</label>
+                                <input type="text" class="form-control" id="title" name="title" required
+                                    placeholder="Zadejte název události" value="{{ old('title') }}"
+                                    oninput="this.setCustomValidity('')">
+                                <div class="invalid-feedback">Prosím, zadejte název události.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Popis</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                    placeholder="Zadejte popis události" oninput="this.setCustomValidity('')">{{ old('description') }}</textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="startDate" class="form-label">Začátek (datum)</label>
+                                    <input type="date" class="form-control" id="startDate" name="start_date" required
+                                        value="{{ old('start_date') }}" oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">Prosím, vyberte platné datum začátku.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="startTime" class="form-label">Začátek (čas)</label>
+                                    <input type="time" class="form-control" id="startTime" name="start_time"
+                                        value="12:00" required oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">Prosím, vyberte čas začátku.</div>
+                                    <input type="text" value="{{ $id1 }}" id="team_id" name="team_id"
+                                        hidden>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label">Konec (datum)</label>
+                                    <input type="date" class="form-control" id="endDate" name="end_date" required
+                                        value="{{ old('end_date') }}" oninput="this.setCustomValidity('')">
+                                    <input type="hidden" id="startDatetime" name="start_datetime">
+                                    <input type="hidden" id="endDatetime" name="end_datetime">
+                                    <input type="hidden" id="isRecurring" name="is_recurring">
+                                    <div class="invalid-feedback">Prosím, vyberte platné datum konce.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endTime" class="form-label">Konec (čas)</label>
+                                    <input type="time" class="form-control" id="endTime" name="end_time"
+                                        value="12:00" required oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">Prosím, vyberte čas konce.</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="recurrenceType" class="form-label">Typ opakování</label>
+                                <select class="form-select" id="recurrenceType" name="recurrence[frequency]" required
+                                    value="none">
+                                    <option value="none">Neopakující se</option>
+                                    <option value="daily">Denně</option>
+                                    <option value="weekly">Týdně</option>
+                                </select>
+                            </div>
+
+                            <div id="recurringOptions" class="mt-3" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="interval" class="form-label">Interval opakování (v dnech)</label>
+                                    <input type="number" class="form-control" id="interval"
+                                        name="recurrence[interval]" min="0" oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">Prosím, zadejte platný interval opakování.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reccuringCheckbox" class="form-label">Použít počet opakování</label>
+                                    <input type="checkbox" id="reccuringCheckbox" name="reccuringCheckbox">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="recurrenceEndDate" class="form-label" id="recurrenceEndDateLabel">Konec
+                                        opakování (datum)</label>
+                                    <input type="date" class="form-control" id="recurrenceEndDate" value=""
+                                        name="recurrence[end_date]" oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">Prosím, vyberte platné datum pro konec opakování.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="recurrenceRepeatCount" class="form-label"
+                                        id="recurrenceRepeatCountLabel">Počet opakování</label>
+                                    <input type="number" class="form-control" id="recurrenceRepeatCount"
+                                        name="recurrence[repeat_count]" min="1"
+                                        oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">Prosím, zadejte platný počet opakování.</div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Uložit událost</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const hash = window.location.hash;
-                if (hash) {
-                    const targetTab = document.querySelector(`button[data-bs-target="${hash}"]`);
-                    if (targetTab) {
-                        const tab = new bootstrap.Tab(targetTab);
-                        tab.show();
+                const recurringCheckbox = document.getElementById('recurringCheckbox');
+                const form = document.getElementById('eventForm');
+                const recurrenceType = document.getElementById('recurrenceType');
+                const recurringOptions = document.getElementById('recurringOptions');
+                const recurrenceEndDate = document.getElementById('recurrenceEndDate');
+                const repeatCount = document.getElementById('recurrenceRepeatCount');
+                const repeatCountLabel = document.getElementById('recurrenceRepeatCountLabel');
+                const reccurenceEndDateLabel = document.getElementById('recurrenceEndDateLabel');
+                var recurrence = 0;
+                recurrenceType.addEventListener('change', function() {
+                    if (recurrenceType.value === 'daily' || recurrenceType.value === 'weekly') {
+                        recurringOptions.style.display = 'block';
+                        recurrence = 1;
+                    } else {
+                        recurringOptions.style.display = 'none';
+                        recurrence = 0;
                     }
+                });
+                if (reccuringCheckbox.checked) {
+                    recurrenceEndDate.style.display = 'none';
+                    recurrenceEndDate.value = '';
+                    repeatCount.style.display = 'block';
+                    recurrenceEndDateLabel.style.display = 'none';
+                    repeatCountLabel.style.display = 'block';
+
+                } else {
+                    recurrenceEndDateLabel.style.display = 'block';
+                    repeatCount.value = '';
+                    repeatCountLabel.style.display = 'none';
+                    recurrenceEndDate.style.display = 'block';
+                    repeatCount.style.display = 'none';
                 }
+
+
+                reccuringCheckbox.addEventListener('change', function(e) {
+                    if (e.target.checked) {
+                        recurrenceEndDateLabel.style.display = 'none';
+                        repeatCountLabel.style.display = 'block';
+                        recurrenceEndDate.style.display = 'none';
+                        repeatCount.style.display = 'block';
+                    } else {
+                        recurrenceEndDateLabel.style.display = 'block';
+                        repeatCountLabel.style.display = 'none';
+                        recurrenceEndDate.style.display = 'block';
+                        repeatCount.style.display = 'none';
+                    }
+                });
+
+                form.addEventListener('submit', function(event) {
+                    let isValid = true;
+
+                    const startDate = document.getElementById('startDate');
+                    const endDate = document.getElementById('endDate');
+                    const startTime = document.getElementById('startTime');
+                    const endTime = document.getElementById('endTime');
+                    const startDateTime = `${startDate.value} ${startTime.value}`;
+                    const endDateTime = `${endDate.value} ${endTime.value}`;
+                    document.getElementById('isRecurring').value = recurrence;
+                    document.getElementById('startDatetime').value = startDateTime;
+                    document.getElementById('endDatetime').value = endDateTime;
+
+                    endTime.setCustomValidity('');
+                    if (endDate.value < startDate.value) {
+                        endDate.setCustomValidity('Konec události nemůže být před začátkem.');
+                        isValid = false;
+                    } else {
+                        endDate.setCustomValidity('');
+                    }
+                    if (endDate.value === startDate.value) {
+                        if (startTime.value >= endTime.value) {
+                            endTime.setCustomValidity('Konec události nemůže být před začátkem.');
+                            isValid = false;
+                        } else {
+                            endTime.setCustomValidity('');
+                        }
+                    }
+                    if (recurringCheckbox.checked) {
+                        if (recurrenceEndDate.value && repeatCount.value) {
+                            recurrenceEndDate.setCustomValidity(
+                                'Nemůžete nastavit oba - konec opakování a počet opakování.');
+                            repeatCount.setCustomValidity(
+                                'Nemůžete nastavit oba - konec opakování a počet opakování.');
+                            isValid = false;
+                        } else {
+                            recurrenceEndDate.setCustomValidity('');
+                            repeatCount.setCustomValidity('');
+                        }
+                    }
+                    if (!isValid) {
+                        event.preventDefault();
+                    }
+                });
             });
-            const recurringSelect = document.getElementById('recurringSelect');
-            const repeatOptions = document.getElementById('repeatOptions');
-            const repeatCount = document.getElementById('repeatCount');
-            const repeatEndDate = document.getElementById('repeatEndDate');
-            const dateList = document.getElementById('previewDates');
-            const startDateInput = document.getElementById('startDateInput');
-            const endDateInput = document.getElementById('endDateInput');
-            const startTimeInput = document.getElementById('startTimeInput');
-            const endTimeInput = document.getElementById('endTimeInput');
-            const repeatInterval = document.getElementById('repeatInterval');
-            const repeatCheckbox = document.getElementById('repeatCheckbox');
 
-
-            function validateDates() {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-                const startTime = new Date('1970-01-01T' + startTimeInput.value);
-                const endTime = new Date('1970-01-01T' + endTimeInput.value);
-
-                if (endDate < startDate) {
-                    alert('Konec události nemůže být před začátkem.');
-                    endDateInput.value = '';
-                }
-
-                if (endDate.getTime() === startDate.getTime() && startTime > endTime) {
-                    alert('Konec události nemůže být před začátkem.');
-                    endTimeInput.value = '';
-                }
-            }
-
-            function calculateRecurrence() {
-                const startDate = new Date(startDateInput.value);
-                const intervalValue = parseInt(repeatInterval.value);
-                const repeatTimes = parseInt(repeatCount.value);
-                const endRecurrence = new Date(repeatEndDate.value);
-
-                let recurrenceDates = [];
-                let currentDate = new Date(startDate);
-                for (let i = 0; i < repeatTimes; i++) {
-                    recurrenceDates.push(new Date(currentDate));
-                    currentDate.setDate(currentDate.getDate() + intervalValue);
-                }
-                dateList.innerHTML = recurrenceDates.slice(0, 6).map(date => `<li>${date.toDateString()}</li>`).join('');
-            }
-            recurringSelect.addEventListener('change', function() {
-                repeatOptions.classList.add('d-none');
-                if (this.value === 'none') {
-                    return;
-                }
-                repeatOptions.classList.remove('d-none');
-            });
-
-            repeatCount.addEventListener('input', calculateRecurrence);
-            repeatEndDate.addEventListener('input', calculateRecurrence);
-            startDateInput.addEventListener('input', validateDates);
-            endDateInput.addEventListener('input', validateDates);
-            startTimeInput.addEventListener('input', validateDates);
-            endTimeInput.addEventListener('input', validateDates);
-            repeatInterval.addEventListener('input', calculateRecurrence);
 
             function editAchievement(id, name, description, image) {
                 $('#editAchievementForm').attr('action', '/achievement/' + id);
                 $('#name').val(name);
                 $('#description').val(description);
-
-
             }
         </script>
 
