@@ -8,9 +8,15 @@
 
 @section('title', 'Oddíl ' . $sectionName)
 @section('content')
-    @vite(['resources/js/app.js'])
+    @vite('resources/js/app.js')
     @use('App\Models\Teams')
     @use('App\Models\Achievements')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -230,7 +236,7 @@
                                     <a href="/events/{{ $nextevent->id }}" rel="noreferrer"
                                         class="card text-decoration-none">
                                         <div class="card-body text-center">
-                                            <h5 class="card-title text-info mb-3">{{ $nextevent->title }}</h5>
+                                            <h5 class="card-title text-primary mb-3">{{ $nextevent->title }}</h5>
                                             <p class="card-text text-muted">
                                                 {{ $nextevent->description }}
                                                 <br>
@@ -280,6 +286,10 @@
                             data-bs-target="#editMemberModal">
                             Přidat člena
                         </button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addMembersModal">
+                            Přidat více členů
+                        </button>
                         @if (null !== Teams::count())
                             <h3 class="text-center text-primary mb-10">Počet členů ({{ $memberCount }})</h3>
                             <div class="card">
@@ -302,7 +312,7 @@
 
                                                                 {{ $item->surname }}</span></td>
                                                     </a>
-                                                    <td>0%</td>
+                                                    <td>{{ $item->attendance_percentage }}%</td>
 
 
                                                     <td>
@@ -318,6 +328,12 @@
                                                                 <a class="dropdown-item"
                                                                     href="/members/{{ $item->id }}">
                                                                     <i class="ri-information-line "></i>Zobrazit
+                                                                </a>
+                                                                <a class="dropdown-item" href="#"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#assignAchievementModal"
+                                                                    data-member-id="{{ $item->id }}">
+                                                                    <i class="ri-edit-line"></i>Přidělit odborky
                                                                 </a>
                                                                 <a class="">
                                                                     <form action="/member/{{ $item->id }}"
@@ -346,39 +362,126 @@
                         @endif
 
                     </div>
-                    <div class="tab-pane fade h-100" id="navs-pills-top-presence" role="tabpanel">
-                        <div class="row mb-12 g-6">
-                            @foreach ($attendance as $event)
-                                <div class="col-md-12 mb-4">
-                                    <h5>{{ $event->title }}</h5>
-                                    <p>{{ $event->start_date }} - {{ $event->end_date }}</p>
+                    <div class="tab-pane fade h-100 overflow-x-scroll" id="navs-pills-top-presence" role="tabpanel">
+                        <button class="btn btn-outline-primary toggle-table mb-3" onclick="toggleTable()">
+                            <i class="ri-arrow-down-s-line"></i> Úprava docházky
+                        </button>
 
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Docházka</th>
-                                                <th>Počet</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Přítomno</td>
-                                                <td>{{ $event->present_count }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Omluveno</td>
-                                                <td>{{ $event->excused_count }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Neomluveno</td>
-                                                <td>{{ $event->unexcused_count }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                        <div class="presence-cards row mb-4" id="presence-cards">
+                            @php
+                                $groupedEvents = $attendance->groupBy(function ($event) {
+                                    return \Carbon\Carbon::parse($event->start_date)->format('d.m.Y');
+                                });
+                            @endphp
+
+                            @foreach ($groupedEvents as $date => $events)
+                                <div class="col-md-12 mb-4">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold">{{ $date }}</span>
+                                            <button class="btn btn-outline-primary toggle-events"
+                                                data-bs-toggle="collapse" data-bs-target="#events-{{ Str::slug($date) }}"
+                                                aria-expanded="false" aria-controls="events-{{ Str::slug($date) }}">
+                                                <i class="ri-arrow-down-s-line"></i>
+                                            </button>
+                                        </div>
+                                        <div id="events-{{ Str::slug($date) }}" class="collapse">
+                                            <div class="card-body">
+                                                @foreach ($events as $event)
+                                                    <div class="event-card mb-3 p-3 border rounded">
+                                                        <a href="/events/{{ $event->id }}">
+                                                            <h5 class="card-title">{{ $event->title }}</h5>
+                                                        </a>
+                                                        <p class="card-text text-muted">
+                                                            {{ $event->description }} </br>
+                                                            <i class="ri-time-line"></i>
+                                                            {{ \Carbon\Carbon::parse($event->start_date)->format('H:i') }}
+                                                            - {{ \Carbon\Carbon::parse($event->end_date)->format('H:i') }}
+                                                        </p>
+                                                        <table
+                                                            class="table table-responsive table-bordered table-sm presence-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Stav</th>
+                                                                    <th>Počet</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td class="text-success"> Přítomno
+                                                                    </td>
+                                                                    <td>{{ $event->present_count }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-warning"> Omluveno
+                                                                    </td>
+                                                                    <td>{{ $event->excused_count }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-danger"> Neomluveno
+                                                                    </td>
+                                                                    <td>{{ $event->unexcused_count }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
+                        <div class="row mb-4">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm d-none" id="attendance-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            @foreach ($events1 as $event)
+                                                <th class="small">
+                                                    {{ \Carbon\Carbon::parse($event->start_date)->format('d.m.Y') }}</th>
+                                            @endforeach
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($members as $member)
+                                            <tr>
+                                                <td>{{ $member->name }}</td>
+                                                @foreach ($events1 as $event)
+                                                    <td>
+                                                        <select class="form-select attendance-status"
+                                                            data-member-id="{{ $member->id }}"
+                                                            data-event-id="{{ $event->id }}"
+                                                            style="font-size: 12px; padding: 0.2rem 0.4rem;">
+                                                            <option value="present"
+                                                                {{ $member->getAttendanceStatus($event->id) == 'present' ? 'selected' : '' }}>
+                                                                <i class="ri-checkbox-circle-line"
+                                                                    style="color: green;"></i> Přítomen
+                                                            </option>
+                                                            <option value="excused"
+                                                                {{ $member->getAttendanceStatus($event->id) == 'excused' ? 'selected' : '' }}>
+                                                                <i class="ri-checkbox-circle-fill"
+                                                                    style="color: orange;"></i> Omlouven
+                                                            </option>
+                                                            <option value="unexcused"
+                                                                {{ $member->getAttendanceStatus($event->id) == 'unexcused' ? 'selected' : '' }}>
+                                                                <i class="ri-close-circle-line" style="color: red;"></i>
+                                                                Neomluven
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+
+
 
 
 
@@ -401,7 +504,7 @@
                                 @foreach ($achievements as $item1)
                                     <div class="col-md-6 col-xl-3 rounded-2xl">
                                         <div class="card shadow-sm border-0">
-                                            <img class="card-img-top rounded-md"
+                                            <img class="rounded-md" height="300px" width="100%"
                                                 src="{{ asset('storage/achievements/' . $item1->image) }}"
                                                 alt="Card image" />
 
@@ -455,7 +558,7 @@
         </div>
         <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editMemberModalLabel">Přidat</h5>
@@ -485,7 +588,7 @@
                                 <div class="col-md-6">
                                     <label for="shirt_size_id" class="form-label">Velikost trika</label>
                                     <select class="form-select" id="shirt_size_id" name="shirt_size_id">
-                                        <option value="">Vyberte velikost</option>
+                                        <option value="" disabled>Vyberte velikost</option>
                                         @foreach ($shirt_sizes as $size)
                                             <option value="{{ $size->id }}">{{ $size->size }}</option>
                                         @endforeach
@@ -635,9 +738,9 @@
 
                             <div class="mb-3">
                                 <label for="recurrenceType" class="form-label">Typ opakování</label>
-                                <select class="form-select" id="recurrenceType" name="recurrence[frequency]" required
+                                <select class="form-select" id="recurrenceType" name="recurrence[frequency]"
                                     value="none">
-                                    <option value="none">Neopakující se</option>
+                                    <option value="">Neopakující se</option>
                                     <option value="daily">Denně</option>
                                     <option value="weekly">Týdně</option>
                                 </select>
@@ -679,8 +782,206 @@
             </div>
         </div>
 
+        <div class="modal fade" id="addMembersModal" tabindex="-1" aria-labelledby="addMembersModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addMembersModalLabel">Vytvořit více členů</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 id="liveEditValue" class="text-center mb-4"></h5>
+                        <form id="addMembersForm" action="{{ route('member.store.multiple') }}" method="POST">
+                            @csrf
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Jméno</th>
+                                            <th>Příjmení</th>
+                                            <th>Přezdívka</th>
+                                            <th>Věk</th>
+                                            <th>Telefon</th>
+                                            <th>Email</th>
+                                            <th>Velikost trika</th>
+                                            <th>Matka > Jméno</th>
+                                            <th>Matka > Příjmení</th>
+                                            <th>Matka > Telefon</th>
+                                            <th>Matka > Email</th>
+                                            <th>Otec > Jméno</th>
+                                            <th>Otec > Příjmení</th>
+                                            <th>Otec > Telefon</th>
+                                            <th>Otec > Email</th>
+                                            <th>Akce</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="membersTableBody">
+                                        @for ($i = 0; $i < 1; $i++)
+                                            <tr>
+                                                <input type="text" value="{{ $id1 }}" id="team_id"
+                                                    name="team_id" hidden>
+                                                <td><input type="text" name="members[{{ $i }}][name]"
+                                                        class="form-control" required></td>
+                                                <td><input type="text" name="members[{{ $i }}][surname]"
+                                                        class="form-control" required></td>
+                                                <td><input type="text" name="members[{{ $i }}][nickname]"
+                                                        class="form-control"></td>
+                                                <td><input type="number" name="members[{{ $i }}][age]"
+                                                        class="form-control"></td>
+                                                <td><input type="number" name="members[{{ $i }}][telephone]"
+                                                        class="form-control"></td>
+                                                <td><input type="email" name="members[{{ $i }}][email]"
+                                                        class="form-control"></td>
 
-
+                                                <td>
+                                                    <select class="form-select"
+                                                        name="members[{{ $i }}][shirt_size_id]">
+                                                        <option value="">Vyberte velikost</option>
+                                                        @foreach ($shirt_sizes as $size)
+                                                            <option value="{{ $size->id }}">{{ $size->size }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                                <td><input type="text"
+                                                        name="members[{{ $i }}][mother_name]"
+                                                        class="form-control"></td>
+                                                <td><input type="text"
+                                                        name="members[{{ $i }}][mother_surname]"
+                                                        class="form-control"></td>
+                                                <td><input type="number"
+                                                        name="members[{{ $i }}][mother_telephone]"
+                                                        class="form-control"></td>
+                                                <td><input type="email"
+                                                        name="members[{{ $i }}][mother_email]"
+                                                        class="form-control"></td>
+                                                <td><input type="text"
+                                                        name="members[{{ $i }}][father_name]"
+                                                        class="form-control"></td>
+                                                <td><input type="text"
+                                                        name="members[{{ $i }}][father_surname]"
+                                                        class="form-control"></td>
+                                                <td><input type="number"
+                                                        name="members[{{ $i }}][father_telephone]"
+                                                        class="form-control"></td>
+                                                <td><input type="email"
+                                                        name="members[{{ $i }}][father_email]"
+                                                        class="form-control"></td>
+                                                <td><button type="button" class="btn btn-danger remove-row">Odstranit
+                                                        řádek</button></td>
+                                            </tr>
+                                        @endfor
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" id="addRowButton" class="btn btn-success mt-3">Přidat další
+                                řádek</button>
+                            <div class="modal-footer mt-3">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                                <button type="submit" class="btn btn-primary">Vytvořit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="editAchievementModal" tabindex="-1" aria-labelledby="editAchievementModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editAchievementModalLabel">Upravit odborku
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editAchievementForm" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Název odborky</label>
+                                <input type="text" class="form-control" id="Lpname" name="name" value=""
+                                    required placeholder="">
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Popis odborky</label>
+                                <textarea class="form-control" id="Lpdescription" name="description" value="" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Obrázek odborky</label>
+                                <input type="file" class="form-control" id="image" name="image">
+                            </div>
+                            <image id="Lpimage" src="" class="image-responsive">
+                                <div class="mt-5">
+                                    <button type="submit" class="btn btn-primary">Upravit</button>
+                                </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="addAchievementModal" tabindex="-1" aria-labelledby="addAchievementModal"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addAchievementModal">Přidat Odborky</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                    </div>
+                    <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Název Odborky</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Popis Odborky</label>
+                                <textarea class="form-control" id="description" name="description"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Obrázek</label>
+                                <input type="file" class="form-control" id="image" name="image"
+                                    accept="image/*">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                            <button type="submit" class="btn btn-primary">Přidat Odborku</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="assignAchievementModal" tabindex="-1" aria-labelledby="assignAchievementModal"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignAchievementModal">Přidat odborky</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addAchievementForm">
+                            <div class="mb-3">
+                                <label for="achievementSelect" class="form-label">Vyberte odborky</label>
+                                <select class="js-example-basic-multiple" id="achievementSelect" name="achievement_id[]"
+                                    multiple="multiple" required>
+                                    @foreach ($achievements as $achievement)
+                                        <option value="{{ $achievement->id }}">{{ $achievement->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <input type="hidden" id="memberId" name="member_id" value="">
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">Přidat</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const recurringCheckbox = document.getElementById('recurringCheckbox');
@@ -692,6 +993,16 @@
                 const repeatCountLabel = document.getElementById('recurrenceRepeatCountLabel');
                 const reccurenceEndDateLabel = document.getElementById('recurrenceEndDateLabel');
                 var recurrence = 0;
+                const hash = window.location.hash;
+                if (hash) {
+                    const targetTab = document.querySelector(`button[data-bs-target="${hash}"]`);
+                    if (targetTab) {
+                        const tab = new bootstrap.Tab(targetTab);
+                        tab.show();
+                    }
+                }
+
+
                 recurrenceType.addEventListener('change', function() {
                     if (recurrenceType.value === 'daily' || recurrenceType.value === 'weekly') {
                         recurringOptions.style.display = 'block';
@@ -775,14 +1086,173 @@
                         event.preventDefault();
                     }
                 });
+                let memberIndex = 1;
+                const membersTableBody = document.getElementById("membersTableBody");
+                const addRowButton = document.getElementById("addRowButton");
+                const liveEditValue = document.getElementById("liveEditValue");
+                addRowButton.addEventListener("click", () => {
+                    const newRow = document.createElement("tr");
+                    newRow.innerHTML = `
+        <td><input type="text" name="members[${memberIndex}][name]" class="form-control editable" required></td>
+        <td><input type="text" name="members[${memberIndex}][surname]" class="form-control editable" required></td>
+        <td><input type="text" name="members[${memberIndex}][nickname]" class="form-control editable"></td>
+                                   <td><input type="number" name="members[${memberIndex}][age]"
+                                                            class="form-control"></td>
+        <td><input type="number" name="members[${memberIndex}][telephone]" class="form-control editable"></td>
+        <td><input type="email" name="members[${memberIndex}][email]" class="form-control editable"></td>
+        <td>
+            <select class="form-select editable" name="members[${memberIndex}][shirt_size_id]">
+                <option value="">Vyberte velikost</option>
+                @foreach ($shirt_sizes as $size)
+                    <option value="{{ $size->id }}">{{ $size->size }}</option>
+                @endforeach
+            </select>
+        </td>
+        <td><input type="text" name="members[${memberIndex}][mother_name]" class="form-control editable"></td>
+        <td><input type="text" name="members[${memberIndex}][mother_surname]" class="form-control editable"></td>
+        <td><input type="number" name="members[${memberIndex}][mother_telephone]" class="form-control editable"></td>
+        <td><input type="email" name="members[${memberIndex}][mother_email]" class="form-control editable"></td>
+        <td><input type="text" name="members[${memberIndex}][father_name]" class="form-control editable"></td>
+        <td><input type="text" name="members[${memberIndex}][father_surname]" class="form-control editable"></td>
+        <td><input type="number" name="members[${memberIndex}][father_telephone]" class="form-control editable"></td>
+        <td><input type="email" name="members[${memberIndex}][father_email]" class="form-control editable"></td>
+                                <td><button type="button" class="btn btn-danger remove-row">Odstranit
+                                                        řádek</button></td>
+    `;
+                    membersTableBody.appendChild(newRow);
+                    memberIndex++;
+                });
+                membersTableBody.addEventListener("click", (event) => {
+                    if (event.target.classList.contains("remove-row")) {
+                        const row = event.target.closest("tr");
+                        row.remove();
+                    }
+                });
+                document.addEventListener("input", (event) => {
+                    const target = event.target;
+                    if (target.tagName === "INPUT" || target.tagName === "SELECT") {
+                        if (target.tagName === "SELECT") {
+                            liveEditValue.textContent = "Vybráno: " + target.options[target.selectedIndex]
+                                .text || "Upravovaný text...";
+                        } else {
+                            liveEditValue.textContent = "Text: " + target.value || "Upravovaný text...";
+                        }
+                    }
+                });
+                $(document).ready(function() {
+                    $('.js-example-basic-multiple').select2({
+                        width: '300px',
+                        dropdownParent: $("#assignAchievementModal")
+                    });
+
+                    $('#assignAchievementModal').on('show.bs.modal', function(e) {
+                        let button = $(e.relatedTarget);
+                        let memberId = button.data('member-id');
+                        $('#memberId').val(memberId);
+                    });
+
+                    $('#addAchievementForm').on('submit', function(e) {
+                        e.preventDefault();
+
+                        let memberId = $('#memberId').val();
+                        let achievementIds = $('#achievementSelect').val();
+
+                        if (!achievementIds || achievementIds.length === 0) {
+                            alert('Vyberte alespoň jednu odborku.');
+                            return;
+                        }
+
+                        $.ajax({
+                            url: '/member-achievements',
+                            method: 'POST',
+                            data: {
+                                member_id: memberId,
+                                achievement_id: achievementIds,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                alert('Odborky byly úspěšně přidány.');
+                                $('#assignAchievementModal').modal('hide');
+                                $('#addAchievementForm')[0].reset();
+                                $('.select2').val(null).trigger('change');
+                            },
+                            error: function(xhr) {
+                                alert('Došlo k chybě. Zkuste to prosím znovu.');
+                                console.error(xhr.responseText);
+                            }
+                        });
+                    });
+                });
+
             });
 
 
+
+            document.querySelectorAll('.toggle-events').forEach(button => {
+                button.addEventListener('click', function() {
+                    const eventId = this.getAttribute('data-event-id');
+                    const eventDetails = document.getElementById('event-' + eventId);
+                    if (eventDetails.style.display === 'none') {
+                        eventDetails.style.display = 'block';
+                        this.textContent = '↑';
+                    } else {
+                        eventDetails.style.display = 'none';
+                        this.textContent = '↓';
+                    }
+                });
+            });
+
             function editAchievement(id, name, description, image) {
                 $('#editAchievementForm').attr('action', '/achievement/' + id);
-                $('#name').val(name);
-                $('#description').val(description);
+
+                $('#Lpname').val(name);
+                $('#Lpdescription').val(description);
+                $('#Lpimage').attr('src', image);
+
+
             }
+
+            function toggleTable() {
+
+                const table = document.getElementById('attendance-table');
+                table.classList.toggle('d-none');
+                const presenceCards = $('#presence-cards');
+                if (presenceCards.css('display') === 'none') {
+                    presenceCards.css('display', 'block');
+                } else {
+                    presenceCards.css('display', 'none');
+                }
+            }
+            document.querySelectorAll('.attendance-status').forEach(function(selectElement) {
+                selectElement.addEventListener('change', function() {
+                    const memberId = this.getAttribute('data-member-id');
+                    const eventId = this.getAttribute('data-event-id');
+                    const status = this.value;
+                    fetch('/update-attendance', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({
+                                member_id: memberId,
+                                event_id: eventId,
+                                status: status
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Úspěšně změněno');
+                            } else {
+                                console.error('Nastala chyba při aktualizaci');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Chyba:', error);
+                        });
+                });
+            });
         </script>
 
     @endsection

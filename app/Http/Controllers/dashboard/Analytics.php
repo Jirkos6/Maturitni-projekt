@@ -12,6 +12,7 @@ use App\Models\Achievements;
 use App\Models\RecurringEvents;
 use App\Models\ShirtSizes;
 use App\Models\Attendance;
+use App\Models\MembersAchievement;
 use Illuminate\Support\Str;
 class Analytics extends Controller
 {
@@ -84,13 +85,86 @@ class Analytics extends Controller
           $member->save(); 
           $team_id = $validated['team_id'];
           $member->teams()->attach($team_id);
+          $events = Events::all();
+          foreach ($events as $item)
+          {
+          Attendance::create([
+            'event_id' => $item->id,
+            'member_id' => $member->id,
+            'status' => 'unexcused',  
+            'confirmed_by_parent' => null, 
+        ]);
+      }
           $request->session()->flash('success', "Člen $member->name byl úspěšně přidán!");
+   
+         
+    
           return redirect()->back()->withFragment('#navs-pills-top-messages');
       } catch (\Exception $e) {
           $request->session()->flash('error', "Nastala chyba při přidávání člena! " . $e->getMessage());
           return redirect()->back()->withFragment('#navs-pills-top-messages');
       }
   }
+  public function memstoremultiple(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'members.*.name' => 'required|string|max:255',
+            'members.*.surname' => 'required|string|max:255',
+            'members.*.age' => 'nullable|integer',
+            'members.*.shirt_size_id' => 'nullable|exists:shirt_sizes,id',
+            'members.*.nickname' => 'nullable|string|max:255',
+            'members.*.telephone' => 'nullable|string|max:255',
+            'members.*.email' => 'nullable|email|max:255',
+            'members.*.mother_name' => 'nullable|string|max:255',
+            'members.*.mother_surname' => 'nullable|string|max:255',
+            'members.*.mother_telephone' => 'nullable|string|max:255',
+            'members.*.mother_email' => 'nullable|email|max:255',
+            'members.*.father_name' => 'nullable|string|max:255',
+            'members.*.father_surname' => 'nullable|string|max:255',
+            'members.*.father_telephone' => 'nullable|string|max:255',
+            'members.*.father_email' => 'nullable|email|max:255',
+            'team_id' => 'required|exists:teams,id',
+        ]);
+        $events = Events::all();
+        foreach ($validated['members'] as $memberData) {
+            $member = new Members;
+            $member->name = $memberData['name'];
+            $member->surname = $memberData['surname'];
+            $member->age = $memberData['age'];
+            $member->shirt_size_id = $memberData['shirt_size_id'];
+            $member->nickname = $memberData['nickname'];
+            $member->telephone = $memberData['telephone'];
+            $member->email = $memberData['email'];
+            $member->mother_name = $memberData['mother_name'];
+            $member->mother_surname = $memberData['mother_surname'];
+            $member->mother_telephone = $memberData['mother_telephone'];
+            $member->mother_email = $memberData['mother_email'];
+            $member->father_name = $memberData['father_name'];
+            $member->father_surname = $memberData['father_surname'];
+            $member->father_telephone = $memberData['father_telephone'];
+            $member->father_email = $memberData['father_email'];
+            $member->save();
+            $team_id = $validated['team_id'];
+            $member->teams()->attach($team_id);
+            foreach($events as $item) {
+              Attendance::create([
+                'event_id' => $item->id,
+                'member_id' => $member->id,
+                'status' => 'unexcused',  
+                'confirmed_by_parent' => null, 
+            ]);
+            }
+        }
+        
+
+        $request->session()->flash('success', "Členové byli úspěšně přidáni!");
+        return redirect()->back()->withFragment('#navs-pills-top-messages');
+    } catch (\Exception $e) {
+        $request->session()->flash('error', "Nastala chyba při přidávání členů! " . $e->getMessage());
+        return redirect()->back()->withFragment('#navs-pills-top-messages');
+    }
+}
   public function teams($id)
   {
 
@@ -106,9 +180,21 @@ class Analytics extends Controller
         'attendances as unexcused_count' => function ($query) {
             $query->where('status', 'unexcused');
         }
-    ])->get();
+    ])->orderBy('start_date','asc')->get();
  
       $members = Teams::with('members')->where('id', $id)->get()->pluck('members')->flatten();
+      $members->map(function ($member) use ($id) {
+        $totalEvents = Events::join('event_team', 'events.id', '=', 'event_team.event_id')
+            ->where('event_team.team_id', $id)
+            ->count();
+
+        $presentCount = Attendance::where('member_id', $member->id)
+            ->where('status', 'present')
+            ->count();
+
+        $percentage = $totalEvents > 0 ? ($presentCount / $totalEvents) * 100 : 0;
+        $member->attendance_percentage = round($percentage, 2);
+    });
       $events = Teams::join('event_team', 'teams.id', '=', 'event_team.team_id')
       ->join('events', 'events.id', '=', 'event_team.event_id')
       ->leftJoin('recurring_events', 'events.id', '=', 'recurring_events.event_id')
@@ -179,10 +265,11 @@ class Analytics extends Controller
         });
       $memberCount = Teams::find($id)->members()->count();
       $events = $transformedEvents->toJson();
+      $events1 = Events::all();
       $shirt_sizes = ShirtSizes::all();
-      return view('content.dashboard.dashboards-teams', compact('events', 'data','nextevent','memberCount','members','presence','achievements','id1','shirt_sizes','attendance'));
+    
+    return view('content.dashboard.dashboards-teams', compact('events', 'data','nextevent','memberCount','members','presence','achievements','id1','shirt_sizes','attendance', 'events1'));
   }
-
   public function achdelete($id) {
     $achievement = Achievements::findOrFail($id);
     if ($achievement) {
@@ -307,12 +394,15 @@ public function eventstore(Request $request)
         if ($request->has('daily') || $request->has('weekly')) {
             $request->merge(['is_recurring' => 1]);
         }
+        else {
+          $request->merge(['is_recurring' => 0]);
+        }
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_datetime' => 'required|date',
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
-            'recurrence.frequency' => 'required_if:is_recurring,1|in:daily,weekly',
+            'recurrence.frequency' => 'required_if:is_recurring,1|in:daily,weekly,',
             'recurrence.day_of_week' => 'nullable|string',
             'recurrence.day_of_month' => 'nullable|string',
             'recurrence.end_date' => 'nullable|date|after:start_date',
@@ -366,5 +456,48 @@ public function eventview($id) {
 $data = Events::find($id);
 return view ('content.dashboard.dashboards-events',compact('data'));
 }
+public function memachstore(Request $request)
+    {
+      $validated = $request->validate([
+        'member_id' => 'required|exists:members,id',
+        'achievement_id' => 'required|array', 
+        'achievement_id.*' => 'exists:achievements,id', 
+    ]);
 
+
+    foreach ($validated['achievement_id'] as $achievementId) {
+        MembersAchievement::create([
+            'member_id' => $validated['member_id'],
+            'achievement_id' => $achievementId,
+        ]);
+    }
+
+        $request->session()->flash('success', "Odborky úspěšně přidány!");
+    }
+    public function attendanceupdate(Request $request)
+    {
+        $validated = $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'event_id' => 'required|exists:events,id',
+            'status' => 'required|in:present,excused,unexcused',
+        ]);
+
+        $attendance = Attendance::where('member_id', $validated['member_id'])
+            ->where('event_id', $validated['event_id'])
+            ->first();
+
+        if ($attendance) {
+            $attendance->status = $validated['status'];
+            $attendance->save();
+        } else {
+            Attendance::create([
+                'member_id' => $validated['member_id'],
+                'event_id' => $validated['event_id'],
+                'status' => $validated['status'],
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+    
 }

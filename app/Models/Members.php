@@ -26,4 +26,12 @@ class Members extends Model
                     ->withPivot('status', 'confirmed_by_parent')
                     ->withTimestamps();
     }
+    public function getAttendanceStatus($eventId)
+    {
+        $attendance = Attendance::where('member_id', $this->id)
+                                            ->where('event_id', $eventId)
+                                            ->first();
+        
+        return $attendance ? $attendance->status : null;
+    }
 }
