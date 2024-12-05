@@ -83,9 +83,9 @@
                     @foreach ($achievements as $achievement)
                         <div class="col-md-3 col-sm-4 col-6 mb-4">
                             <div class="card shadow-sm rounded-3">
-                                <img class="card-img-top rounded-3"
+                                <img class="rounded-3" width="100%" height="290px"
                                     src="{{ asset('storage/achievements/' . $achievement->image) }}"
-                                    alt="Achievement Image" style="height: auto; object-fit: cover;" />
+                                    alt="Achievement Image" />
                                 <div class="card-body p-3">
                                     <h5 class="card-title text-center" style="font-size: 1rem;">{{ $achievement->name }}
                                     </h5>

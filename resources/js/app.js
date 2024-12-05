@@ -3,8 +3,8 @@ import './bootstrap';
 import { Calendar } from '@fullcalendar/core';
 import multiMonthPlugin from '@fullcalendar/multimonth';
 import rrulePlugin from '@fullcalendar/rrule';
-
-
+import $ from 'jquery';
+window.$ = window.jQuery = $;
 window.Calendar = Calendar;
 window.multiMonthPlugin = multiMonthPlugin;
 window.rrulePlugin = rrulePlugin;
