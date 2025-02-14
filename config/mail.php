@@ -47,10 +47,12 @@ return [
       'timeout' => null,
       'local_domain' => env('MAIL_EHLO_DOMAIN'),
     ],
-
     'ses' => [
       'transport' => 'ses',
     ],
+    'mailjet' => [
+      'transport' => 'mailjet',
+  ],
 
     'postmark' => [
       'transport' => 'postmark',
