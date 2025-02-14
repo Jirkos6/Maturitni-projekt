@@ -13,9 +13,12 @@
     "google/apiclient": "*",
     "laravel/framework": "^11.0",
     "laravel/jetstream": "^5.3",
+    "laravel/reverb": "^1.0",
     "laravel/sanctum": "^4.0",
     "laravel/tinker": "^2.9",
     "livewire/livewire": "^3.0",
+    "mailersend/laravel-driver": "^2.7",
+    "mailjet/laravel-mailjet": "^3.1",
     "spatie/laravel-google-calendar": "^3.8",
     "symfony/mailer": "^7.1",
     "symfony/mailer-send-mailer": "^7.1"

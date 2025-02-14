@@ -26,10 +26,14 @@
         "browser-sync": "2.29.3",
         "cross-env": "7.0.3",
         "glob": "10.4.5",
+        "laravel-echo": "^2.0.0",
         "lodash": "4.17.21",
         "postcss": "^8.4.32",
         "prettier": "3.2.5",
         "prop-types": "15.8.1",
+        "pusher-js": "^8.4.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
         "resolve-url-loader": "5.0.0",
         "sass": "1.76.0",
         "sass-loader": "14.0.0",
@@ -92,12 +96,15 @@
         "@popperjs/core": "2.11.8",
         "apexcharts-clevision": "3.28.5",
         "bootstrap": "5.3.3",
+        "build": "^0.1.4",
         "highlight.js": "11.9.0",
         "jquery": "^3.7.1",
         "laravel-vite-plugin": "1.0.5",
         "masonry-layout": "4.2.2",
         "node-waves": "0.7.6",
+        "npm": "^11.1.0",
         "perfect-scrollbar": "1.5.5",
-        "remixicon": "4.3.0"
+        "remixicon": "4.3.0",
+        "run": "^1.5.0"
     }
 }

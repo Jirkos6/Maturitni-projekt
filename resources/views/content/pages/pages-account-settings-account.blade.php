@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Account settings - Account')
+@section('title', 'Nastavení účtu')
 
 @section('page-script')
     @vite(['resources/assets/js/pages-account-settings-account.js'])
@@ -55,7 +55,7 @@
                         @endif
                     </div>
                 </div>
-            </div> 
+            </div>
         </div>
-    </div> 
+    </div>
 @endsection

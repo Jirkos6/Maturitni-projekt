@@ -4,7 +4,6 @@
 @endphp
 
 @extends('layouts/contentNavbarLayout')
-
 @section('title', 'Člen - ' . $data->name . ' ' . $data->surname)
 
 @section('content')
@@ -69,7 +68,10 @@
                                 <button type="submit" class="btn btn-danger btn-sm">
                                     <i class="ri-delete-bin-6-line"></i> Smazat
                                 </button>
+
                             </form>
+                            <button class="btn btn-primary btn-sm ms-2" onClick="history.back()" style="display:inline;"><i
+                                    class="ri-arrow-go-back-fill"></i> Zpátky</button>
                         </div>
                     </div>
                 </div>
@@ -120,7 +122,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('member.update', $data->id) }}" method="POST" id="editMemberForm">
+                    <form action="{{ route('member.update', $data->members_id) }}" method="POST" id="editMemberForm">
                         @csrf
                         @method('PUT')
 

@@ -9,6 +9,12 @@
         "label-primary fs-tiny",
         "Nové"
       ]
+    },
+    {
+      "url": "/dashboard",
+      "name": "Rodičovský panel",
+      "icon": "menu-icon tf-icons ri-parent-line",
+      "slug": "dashboard"
     }
   ]
 }
