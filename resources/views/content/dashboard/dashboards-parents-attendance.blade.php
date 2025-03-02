@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-10 lg:pl-72">
-        <h1 class="text-4xl font-bold text-gray-800 text-center mt-16 mb-10">
+        <h1 class="text-4xl font-bold text-white text-center mt-16 mb-10">
             {{ $members->name }} {{ $members->surname }}
         </h1>
         @if (session('success'))

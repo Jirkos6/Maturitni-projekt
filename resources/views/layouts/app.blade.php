@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    @vite(['resources/css/background.css'])
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 

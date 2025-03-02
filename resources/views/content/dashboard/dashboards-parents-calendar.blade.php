@@ -40,7 +40,7 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay,multiMonthYear,listYear'
+                    right: 'dayGridMonth,multiMonthYear,listYear'
                 },
                 views: {
                     dayGridMonth: {
@@ -91,12 +91,7 @@
             calendar.render();
         });
     </script>
-    <style>
-        #calendar {
-            max-width: 85%;
-            margin: 1px auto;
-        }
-    </style>
+
     <div class="container mx-auto px-4 py-10 lg:pl-72 mt-20">
         <div id="calendar"></div>
     </div>

@@ -1,8 +1,7 @@
 @extends('layouts.parent')
 
 @section('content')
-    <div class="container mx-auto px-4 py-10 lg:pl-72">
-        <h1 class="text-4xl font-semibold text-gray-800 dark:text-white mb-8 font-sans">Dashboard Overview</h1>
+    <div class="container mx-auto px-4 py-10 lg:pl-72 mt-12">
         <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <div class="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">

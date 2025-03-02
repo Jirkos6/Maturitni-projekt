@@ -5,6 +5,10 @@
     <title>Skaut</title>
     <meta charset="UTF-8">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (Route::is('dashboard.calendar'))
+        @vite(['resources/css/calendar.css'])
+    @endif
+    @vite(['resources/css/background.css'])
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
