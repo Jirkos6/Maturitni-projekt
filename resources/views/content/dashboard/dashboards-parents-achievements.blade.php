@@ -6,6 +6,7 @@
             <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-12 border border-gray-300 dark:border-gray-700">
                 <div class="mb-10 pb-6 border-b border-gray-300 dark:border-gray-700">
                     <div class="flex items-center justify-between">
+                        <span class="text-4xl font-bold text-blue-500 font-sans">{{ count($achievements) }}</span>
                         <i class="ri-award-line text-blue-500 text-5xl"></i>
                         <h2 class="text-3xl font-bold text-gray-800 dark:text-white font-sans">
                             <strong>Získané Odborky</strong>
@@ -24,9 +25,7 @@
                         </div>
                     @endforeach
                 </div>
-                <div class="flex justify-between items-center mt-10">
-                    <span class="text-4xl font-bold text-blue-500 font-sans">{{ count($achievements) }}</span>
-                </div>
+
             </div>
         </div>
     </div>

@@ -296,6 +296,7 @@ class Analytics extends Controller
     $achievement = Achievements::findOrFail($id);
     if ($achievement) {
     $achievement->delete();
+    File::delete($achievement->image);
     return redirect()->back()->with('success', 'Položka byla úspěšně smazána!');
     }
     else {
@@ -455,6 +456,9 @@ public function eventstore(Request $request)
         if( $request->input('sendMailCheckbox') == true ) {
           $tempvar = 1;
         }
+        else{
+          $tempvar = 0;
+        }
         $team = Teams::findOrFail($request->input('team_id'));
         $team->events()->attach($event);
         $members = $team->members;
@@ -540,15 +544,15 @@ public function memachstore(Request $request)
             'member_id' => 'nullable|exists:members,id',
             'email' => 'required|email|max:255',
           ]);
+          $user = new User;
+          $user->name = $validated['name'];
+          $user->surname = $validated['surname'];
+          $user->email = $validated['email'];
+          $password = Str::random(8);
+          $hash = Hash::make($password);
+          $user->password = $hash;
+          $user->save();
           if( $request->input('emailCheckbox') == true ) {
-            $user = new User;
-            $user->name = $validated['name'];
-            $user->surname = $validated['surname'];
-            $user->email = $validated['email'];
-            $password = Str::random(8);
-            $hash = Hash::make($password);
-            $user->password = $hash;
-            $user->save();
             Mail::to($user->email)->send(new TestEmail($user->name, $user->surname, $password));
             $request->session()->flash('success', "Uživatel $user->name $user->surname byl úspěšně přidán a email zaslán! Heslo uživatele je: $password");
             }

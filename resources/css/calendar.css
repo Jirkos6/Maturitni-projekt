@@ -1,0 +1,95 @@
+#wrapper,
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number,
+.fc-event-time,
+.fc-event-title,
+.fc-daygrid-more-link,
+.fc-list-table,
+.fc-timeGridWeek-view,
+.fc-timegrid-slot-label,
+.fc-daygrid-day-events,
+.fc-timegrid-axis-cushion,
+.fc-toolbar-title,
+.fc-multimonth-title,
+.fc-popover-header {
+  font-family:
+    Arial,
+    Helvetica Neue,
+    Helvetica,
+    sans-serif;
+  font-size: 14px;
+  color: #e0e0e0;
+}
+
+#calendar {
+  margin: 40px auto;
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+a.fc-event.fc-daygrid-event[href] {
+  color: #4da6ff;
+}
+
+a.fc-event.fc-daygrid-event[href]:visited {
+  color: #b380ff;
+}
+
+.fc .fc-daygrid-day.fc-day-other {
+  background: var(--fc-neutral-bg-color);
+}
+
+.fc .fc-scrollgrid-section-sticky > * {
+  background: unset;
+  position: sticky;
+  z-index: 3;
+}
+
+:not(td[aria-labelledby]) > .fc-daygrid-day-frame {
+  background: var(--fc-neutral-bg-color);
+}
+
+.fc .fc-scrollgrid-section-body {
+  background: var(--fc-page-bg-color);
+}
+
+.fc .fc-timegrid-slot-label,
+.fc .fc-timegrid-axis-frame {
+  background-color: var(--main-page-bg-color);
+}
+
+:root {
+  --main-page-bg-color: #1b1b1f;
+  --fc-small-font-size: 0.85em;
+  --fc-page-bg-color: #25252b;
+  --fc-neutral-bg-color: #303038;
+  --fc-neutral-text-color: #a0a0a0;
+  --fc-border-color: #505050;
+
+  --fc-button-text-color: #ffffff;
+  --fc-button-bg-color: #3a6ea5;
+  --fc-button-border-color: #3a6ea5;
+  --fc-button-hover-bg-color: #315c87;
+  --fc-button-hover-border-color: #294d73;
+  --fc-button-active-bg-color: #294d73;
+  --fc-button-active-border-color: #1f3c5c;
+
+  --fc-event-bg-color: #467a9e;
+  --fc-event-border-color: #467a9e;
+  --fc-event-text-color: #ffffff;
+  --fc-event-selected-overlay-color: rgba(255, 255, 255, 0.1);
+
+  --fc-more-link-bg-color: #444;
+  --fc-more-link-text-color: inherit;
+
+  --fc-event-resizer-thickness: 8px;
+  --fc-event-resizer-dot-total-width: 8px;
+  --fc-event-resizer-dot-border-width: 1px;
+
+  --fc-non-business-color: rgba(180, 180, 180, 0.2);
+  --fc-bg-event-color: rgb(100, 180, 120);
+  --fc-bg-event-opacity: 0.2;
+  --fc-highlight-color: rgba(120, 180, 200, 0.2);
+  --fc-today-bg-color: rgba(77, 166, 255, 0.15);
+  --fc-now-indicator-color: #ff5555;
+}

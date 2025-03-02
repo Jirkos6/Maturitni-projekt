@@ -80,6 +80,7 @@
                         </form>
                     </div>
                 </div>
+
                 @if (Teams::exists())
 
                     <div class="row mb-12 g-6">
