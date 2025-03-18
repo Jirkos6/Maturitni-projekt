@@ -104,7 +104,7 @@
         "node-waves": "0.7.6",
         "npm": "^11.1.0",
         "perfect-scrollbar": "1.5.5",
-        "remixicon": "4.3.0",
+        "remixicon": "4.6.0",
         "run": "^1.5.0"
     }
 }
