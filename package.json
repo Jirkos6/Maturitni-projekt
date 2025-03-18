@@ -103,7 +103,7 @@
         "masonry-layout": "4.2.2",
         "node-waves": "0.7.6",
         "npm": "^11.1.0",
-        "perfect-scrollbar": "1.5.5",
+        "perfect-scrollbar": "1.5.6",
         "remixicon": "4.3.0",
         "run": "^1.5.0"
     }
