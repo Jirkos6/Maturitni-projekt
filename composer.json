@@ -15,6 +15,8 @@
     "laravel/jetstream": "^5.3",
     "laravel/reverb": "^1.0",
     "laravel/sanctum": "^4.0",
+    "laravel/socialite": "^5.18",
+    "laravel/telescope": "^5.5",
     "laravel/tinker": "^2.9",
     "livewire/livewire": "^3.0",
     "mailersend/laravel-driver": "^2.7",
@@ -24,6 +26,7 @@
     "symfony/mailer-send-mailer": "^7.1"
   },
   "require-dev": {
+    "barryvdh/laravel-debugbar": "^3.15",
     "fakerphp/faker": "^1.23",
     "laravel/pint": "^1.13",
     "laravel/sail": "^1.26",

@@ -5,92 +5,257 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nová Akce Vytvořena</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
         body {
-            background: linear-gradient(to bottom, #f0f4f8, #d9e6f1);
+            background-color: #f1f5f9;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
         }
 
         .header {
-            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
             color: white;
-            padding: 20px;
+            padding: 28px 24px;
             text-align: center;
         }
 
         .header h1 {
-            font-size: 1.8rem;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.025em;
         }
 
         .header p {
-            margin-top: 5px;
-            font-size: 1rem;
+            font-size: 16px;
             opacity: 0.9;
+            letter-spacing: -0.01em;
+        }
+
+        .content {
+            padding: 30px 25px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            letter-spacing: -0.01em;
+        }
+
+        .message {
+            color: #475569;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .event-box {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-left: 4px solid #0284c7;
+            border-radius: 10px;
+            padding: 22px;
+            margin: 25px 0;
+        }
+
+        .event-item {
+            margin-bottom: 14px;
+        }
+
+        .event-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-label {
+            font-weight: 600;
+            color: #0369a1;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .event-value {
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .event-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
         }
 
         .divider {
             height: 1px;
-            background: linear-gradient(to right, #d9e6f1, transparent);
-            margin: 20px 0;
+            background: #e2e8f0;
+            margin: 28px 0;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #8ca3f8, #8db6f8);
+            color: white;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+        }
+
+        .text-center {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .text-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 6px;
+            display: inline-block;
+        }
+
+        .text-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background-color: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .logo {
+            height: 30px;
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .calendar-icon {
+            background-color: #dbeafe;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            border: 2px solid #bfdbfe;
+            color: #1e40af;
+            font-weight: bold;
+        }
+
+        .calendar-month {
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: -4px;
+        }
+
+        .calendar-day {
+            font-size: 22px;
         }
     </style>
 </head>
 
 <body>
-    <div class="max-w-2xl mx-auto mt-10 bg-white shadow-lg rounded-lg overflow-hidden">
-        <!-- Header -->
+    <div class="container">
         <div class="header">
-            <h1>Nová Akce Vytvořena!</h1>
+            <h1>Nová akce v družině!</h1>
+            <p>Informace o nové akci</p>
         </div>
 
-        <div class="p-6">
-            <h2 class="text-xl font-bold text-gray-800">
+        <div class="content">
+            <h2 class="greeting">
                 Vážená Paní, Vážený Pane
             </h2>
-            <p class="mt-4 text-gray-600">
-                Přidali jsme Vašeho syna/dceru k nové akci. Níže naleznete detaily:
+
+            <p class="message">
+                K družině byla přiřazena nová akce. Níže naleznete detaily. Nezapomeňte potvrdit účast dítěte v sekci
+                Potvrzení účasti.
             </p>
 
-            <div class="bg-gray-100 border border-gray-300 rounded-lg p-4 mt-4">
-                <p class="text-gray-800">
-                    <span class="font-semibold">Název akce:</span> <span class="font-bold">{{ $title }}</span>
-                </p>
-                <p class="mt-2 text-gray-800">
-                    <span class="font-semibold">Popis akce:</span> {{ $description }}
-                </p>
-                <p class="mt-2 text-gray-800">
-                    <span class="font-semibold">Datum a čas:</span>
-                    {{ \Carbon\Carbon::parse($start)->format('d. m. Y H:i') }} -
-                    {{ \Carbon\Carbon::parse($end)->format('d. m. Y H:i') }}
-                </p>
-
+            <div class="event-box">
+                <div class="event-item">
+                    <span class="event-label">Název akce:</span>
+                    <span class="event-title">{{ $title }}</span>
+                </div>
+                @if ($description)
+                    <div class="event-item">
+                        <span class="event-label">Popis akce:</span>
+                        <span class="event-value">{{ $description }}</span>
+                    </div>
+                @endif
+                <div class="event-item">
+                    <span class="event-label">Datum a čas:</span>
+                    <span class="event-value">
+                        {{ \Carbon\Carbon::parse($start)->format('d.m.Y H:i') }} -
+                        {{ \Carbon\Carbon::parse($end)->format('d.m.Y H:i') }}
+                    </span>
+                </div>
             </div>
 
             <div class="divider"></div>
 
-            <p class="mt-4 text-gray-700">
-                Těšíme se na Vaši účast. Pokud máte nějaké dotazy, neváhejte nás kontaktovat.
-            </p>
-
-            <div class="mt-6">
-                <a href="{{ url('/dashboard') }}">
-                    <button class="button">
-                        Zobrazit Detaily Akce
-                    </button>
+            <div class="btn-container">
+                <a href="{{ url('/dashboard') }}" class="btn-primary">
+                    Zobrazit detaily akce
                 </a>
             </div>
 
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">Nebo klikněte na níže uvedený odkaz:</p>
-                <a href="{{ url('/dashboard') }}" class="text-blue-600 font-semibold hover:underline">
-                    Klikněte zde pro zobrazení akce
+            <div class="text-center">
+                <p>Nebo použijte tento odkaz:</p>
+                <a href="{{ url('/dashboard') }}" class="text-link">
+                    {{ url('/dashboard') }}
                 </a>
             </div>
         </div>
-        <footer class="bg-gray-50 border-t border-gray-200 text-center p-4 text-gray-500 text-sm">
-            Copyright © Skaut @php echo date("Y"); @endphp
-        </footer>
+
+        <div class="footer">
+            <p>Všechny akce můžete sledovat ve vašem profilu po přihlášení</p>
+            <p style="margin-top: 12px;">Copyright © Kormorán {{ date('Y') }}. Všechna práva vyhrazena.</p>
+        </div>
     </div>
 </body>
 

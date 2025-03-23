@@ -1,6 +1,6 @@
 @extends('layouts/blankLayout')
 
-@section('title', 'Error - Pages')
+@section('title', 'Chybové - Stránky')
 
 @section('page-style')
     @vite(['resources/assets/vendor/scss/pages/page-misc.scss'])

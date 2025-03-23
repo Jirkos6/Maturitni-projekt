@@ -8,10 +8,8 @@
     </x-slot>
 
     <x-slot name="form">
-        <!-- Profilová fotka -->
         @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
             <div x-data="{ photoName: null, photoPreview: null }" class="col-span-6 sm:col-span-4">
-                <!-- Vstup pro soubor profilové fotky -->
                 <input type="file" id="photo" class="hidden" wire:model.live="photo" x-ref="photo"
                     x-on:change="
                                     photoName = $refs.photo.files[0].name;
@@ -23,14 +21,10 @@
                             " />
 
                 <x-label for="photo" value="{{ __('Fotka') }}" />
-
-                <!-- Aktuální profilová fotka -->
                 <div class="mt-2" x-show="! photoPreview">
                     <img src="{{ $this->user->profile_photo_url }}" alt="{{ $this->user->name }}"
                         class="rounded-full h-20 w-20 object-cover">
                 </div>
-
-                <!-- Náhled nové profilové fotky -->
                 <div class="mt-2" x-show="photoPreview" style="display: none;">
                     <span class="block rounded-full w-20 h-20 bg-cover bg-no-repeat bg-center"
                         x-bind:style="'background-image: url(\'' + photoPreview + '\');'">
@@ -50,8 +44,6 @@
                 <x-input-error for="photo" class="mt-2" />
             </div>
         @endif
-
-        <!-- Jméno -->
         <div class="col-span-6 sm:col-span-4">
             <x-label for="name" value="{{ __('Jméno') }}" />
             <x-input id="name" type="text" class="mt-1 block w-full" wire:model="state.name" required
@@ -59,7 +51,6 @@
             <x-input-error for="name" class="mt-2" />
         </div>
 
-        <!-- Email -->
         <div class="col-span-6 sm:col-span-4">
             <x-label for="email" value="{{ __('Email') }}" />
             <x-input id="email" type="email" class="mt-1 block w-full" wire:model="state.email" required

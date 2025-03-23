@@ -17,99 +17,180 @@
 
 @section('content')
     @use('App\Models\Teams')
+    @use('App\Models\Events')
+    @use('\Carbon\Carbon')
     @if (session('success'))
-        <br>
-        <div class="alert alert-success">
-            {{ session('success') }}
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex">
+                <i class="ri-checkbox-circle-line me-2 fs-5 align-self-center"></i>
+                <div>{{ session('success') }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <br>
-        <br>
     @endif
 
     @if (session('error'))
-        <br>
-        <div class="alert alert-danger">
-            {{ session('error') }}
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex">
+                <i class="ri-error-warning-line me-2 fs-5 align-self-center"></i>
+                <div>{{ session('error') }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <br>
-        <br>
     @endif
-
-    <div class="card mb-6">
-        <h5 class="card-header">Oddíly <span
-                class="badge badge-center rounded-pill bg-label-primary">{{ Teams::count() }}</span> </h5>
+    <div class="card mb-4">
         <div class="card-body">
-            <div class="row gy-3">
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="mt-4">
-
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
-                            Přidat&nbsp;<i class="ri-add-circle-fill"></i>
-                        </button>
-                        <form method="POST" enctype="multipart/form-data" action="/teams">
-                            @csrf
-                            <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel1">Přidaní oddílu</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col mb-6 mt-2">
-                                                    <div class="form-floating form-floating-outline">
-                                                        <input type="text" id="name" name="name" required
-                                                            class="form-control" placeholder="Zadejte název">
-                                                        <label for="name">Název</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-outline-secondary"
-                                                data-bs-dismiss="modal">Zavřít</button>
-                                            <button type="submit" class="btn btn-primary">Přidat</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h4 class="mb-0"><i class="ri-dashboard-line me-2 text-primary"></i>Přehled družin</h4>
+                    <p class="text-muted mb-0">Správa a přehled všech družin</p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
+                        <i class="ri-add-line me-1"></i> Přidat družinu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card  border-0 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-warning p-3 bg-opacity-10 me-3">
+                        <i class="ri-team-line text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle mb-1 text-muted">Celkem družin</h6>
+                        <h4 class="card-title mb-0">{{ Teams::count() }}</h4>
                     </div>
                 </div>
-
-                @if (Teams::exists())
-
-                    <div class="row mb-12 g-6">
-                        @foreach ($data as $team)
-                            <div class="col-md-6 col-xl-2 rounded-2xl">
-                                <a href="/teams/{{ $team->id }}" rel="noreferrer">
-                                    <div class="card">
-                                        <img class="card-img-top rounded-md"
-                                            src="{{ asset('https://skaut-kostelec.cz/wp-content/uploads/2020/07/logo-skaut-small.png') }}"
-                                            alt="Card image cap" />
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $team->name }}</h5>
-                                            <span class="badge rounded-pill bg-label-primary">
-                                                <p class="card-text">
-                                                    <small class="text-muted"><i class="ri-user-fill"></i></i>
-                                                        {{ $team->members->count() }}</small>
-                                            </span>
-                                            </p>
-
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        @endforeach
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-25 p-3 me-3">
+                        <i class="ri-user-line text-success fs-4"></i>
                     </div>
-                @else
-                    <h5 class="pb-1 mb-6">Ještě si nevytvořil žádné oddíly!</h5>
+                    <div>
+                        <h6 class="card-subtitle mb-1 text-muted">Celkem členů</h6>
+                        <h4 class="card-title mb-0">{{ $data->sum(function ($team) {return $team->members->count();}) }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-info bg-opacity-25 p-3 me-3">
+                        <i class="ri-calendar-event-line text-info fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle mb-1 text-muted">Nadcházející akce</h6>
+                        <h4 class="card-title mb-0">
+                            @php
+                                $events = Events::All();
+                            @endphp
+                            {{ $events->filter(function ($event) {
+                                    return Carbon::parse($event->start_date)->isFuture();
+                                })->count() }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                @endif
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="ri-team-line me-2 text-primary"></i>Seznam družin
+                    <span class="badge bg-primary ms-2">{{ Teams::count() }}</span>
+                </h5>
+            </div>
+        </div>
 
+        <div class="card-body">
+            @if (Teams::exists())
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4">
+                    @foreach ($data as $team)
+                        <div class="col">
+                            <div class="card h-100 border shadow-sm hover-shadow">
+                                <div class="position-relative">
+                                    <img class="card-img-top"
+                                        style="height: 140px; object-fit: contain; padding: 1rem; background-color: #f8f9fa;"
+                                        src="{{ asset('https://assets.grok.com/users/1d9ba289-0702-422d-9d57-92fd56372e21/pwomf3DuY0qK9ndW-generated_image.jpg') }}"
+                                        alt="{{ $team->name }}" />
+                                    <div class="position-absolute top-0 end-0 p-2">
+                                        <span class="badge bg-primary rounded-pill">
+                                            <i class="ri-user-line me-1"></i>{{ $team->members->count() }}
+                                        </span>
+                                    </div>
+                                </div>
 
-            @endsection
+                                <div class="card-body text-center">
+                                    <h5 class="card-title mb-3">{{ $team->name }}</h5>
+                                    <a href="/teams/{{ $team->id }}" class="btn btn-sm btn-primary stretched-link">
+                                        <i class="ri-eye-line me-1"></i> Zobrazit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="ri-team-line text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-primary mb-3">Ještě nebyly vytvořeny žádné družiny!</h3>
+                    <p class="text-muted mb-4">Přidejte první družinu pomocí tlačítka níže.</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
+                        <i class="ri-add-line me-1"></i> Přidat družinu
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+    <form method="POST" enctype="multipart/form-data" action="/teams">
+        @csrf
+        <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-white">
+                        <h5 class="modal-title" id="exampleModalLabel1">
+                            <i class="me-2"></i>Přidání družiny
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="name" class="form-label">Název družiny</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ri-group-line"></i></span>
+                                    <input type="text" id="name" name="name" required class="form-control"
+                                        placeholder="Zadejte název družiny">
+                                </div>
+                                <div class="form-text">Zadejte jedinečný název pro novou družinu.</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="ri-close-line me-1"></i> Zavřít
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-1"></i> Přidat družinu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+@endsection

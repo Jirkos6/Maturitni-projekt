@@ -19,5 +19,12 @@ class Attendance extends Model
     {
         return $this->belongsTo(Members::class);
     }
+    public static function getStatusesForEvents($eventIds, $memberIds)
+    {
+        return static::whereIn('event_id', $eventIds)
+            ->whereIn('member_id', $memberIds)
+            ->get()
+            ->groupBy(['event_id', 'member_id']);
+    }
 
 }

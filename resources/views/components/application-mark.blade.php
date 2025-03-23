@@ -1,1 +1,1 @@
-<img src="https://www.svgrepo.com/show/422032/scout-hat.svg" alt="Logo" {{ $attributes }}>
+<img src="{{ asset('storage/kormoran.jpg') }}" alt="Kormoran" {{ $attributes }} style="border-radius:10px;">

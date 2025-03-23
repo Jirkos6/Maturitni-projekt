@@ -4,7 +4,7 @@
 
         <div class="w-full max-w-7xl text-center mt-20">
             <button
-                class="px-6 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition duration-300 mb-5"
+                class="px-6 py-2 text-sm font-semibold text-white bg-blue-400 hover:bg-blue-600 rounded-lg transition duration-300 mb-5"
                 onClick="history.back()">
                 Zpátky
             </button>

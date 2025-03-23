@@ -8,240 +8,281 @@
 
 @section('content')
     @if (\Session::has('success'))
-        <div class="alert alert-success">
-            <ul>
-                <li>{!! \Session::get('success') !!}</li>
-            </ul>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="d-flex">
+                <i class="ri-checkbox-circle-line me-2 fs-5 align-self-center"></i>
+                <div>{!! \Session::get('success') !!}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
     @if (\Session::has('error'))
-        <div class="alert alert-danger">
-            <ul>
-                <li>{!! \Session::get('error') !!}</li>
-            </ul>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="d-flex">
+                <i class="ri-error-warning-line me-2 fs-5 align-self-center"></i>
+                <div>{!! \Session::get('error') !!}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-sm rounded-3">
-                    <img class="card-img-top rounded-top" src="https://www.w3schools.com/w3images/avatar2.png"
-                        alt="Profile Image" />
+    <div class="container-fluid py-4">
+        <div class="mb-4">
+            <button class="btn btn-outline-primary" onclick="history.back()">
+                <i class="ri-arrow-left-line me-1"></i> Zpět na seznam
+            </button>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-primary text-white p-4 position-relative">
+                        <div class="text-center">
+                            <div class="avatar avatar-xl bg-white text-primary mx-auto mb-3">
+                                {{ substr($data->name, 0, 1) }}{{ substr($data->surname, 0, 1) }}
+                            </div>
+                            <h4 class="mb-1">{{ $data->name }} {{ $data->surname }}</h4>
+                            @if ($data->nickname)
+                                <p class="mb-0 text-white opacity-75">"{{ $data->nickname }}"</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="mt-3 text-center">
+                            @if ($data->age)
+                                <span class="badge bg-primary text-white">{{ $data->age }} let</span>
+                            @endif
+                            @if ($data->size)
+                                <span class="badge bg-info text-white ms-2">Velikost trička: {{ $data->size }}</span>
+                            @endif
+                        </div>
+
+                        <div class="list-group list-group-flush mt-4">
+                            @if ($data->email)
+                                <div class="list-group-item px-0 py-2 d-flex border-top-0">
+                                    <div class="avatar avatar-sm bg-primary text-primary me-3">
+                                        <i class="ri-mail-line"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Email</small>
+                                        <span>{{ $data->email }}</span>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($data->telephone)
+                                <div class="list-group-item px-0 py-2 d-flex">
+                                    <div class="avatar avatar-sm bg-primary text-primary me-3">
+                                        <i class="ri-phone-line"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Telefon</small>
+                                        <span>{{ $data->telephone }}</span>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 text-dark">Kontaktní informace</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title text-center">{{ $data->name }} {{ $data->surname }}</h5>
-                        <p class="text-center text-muted">Age: {{ $data->age }}</p>
+                        <div class="row">
+                            @if ($data->mother_name || $data->mother_surname || $data->mother_telephone || $data->mother_email)
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 bg-light border-0">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar avatar-sm bg-primary-subtle text-primary me-3">
+                                                    <i class="ri-user-3-line"></i>
+                                                </div>
+                                                <h6 class="mb-0 text-dark">Kontakt na matku</h6>
+                                            </div>
 
-                        <div class="mb-3">
-                            <p><strong>Přezdívka:</strong> {{ $data->nickname ?? '' }}</p>
-                            <p><strong>Email:</strong> {{ $data->email ?? '' }}</p>
-                            <p><strong>Telefon:</strong> {{ $data->telephone ?? '' }}</p>
-                        </div>
+                                            <div class="list-group list-group-flush">
+                                                @if ($data->mother_name || $data->mother_surname)
+                                                    <div class="list-group-item px-0 py-2 border-0 bg-transparent">
+                                                        <small class="text-muted d-block">Jméno</small>
+                                                        <span>{{ $data->mother_name ?? '' }}
+                                                            {{ $data->mother_surname ?? '' }}</span>
+                                                    </div>
+                                                @endif
 
-                        <div class="mb-3">
-                            <p><strong>Velikost trička:</strong> {{ $data->size ? '' . $data->size : '' }}</p>
-                        </div>
+                                                @if ($data->mother_telephone)
+                                                    <div class="list-group-item px-0 py-2 border-0 bg-transparent">
+                                                        <small class="text-muted d-block">Telefon</small>
+                                                        <span>{{ $data->mother_telephone }}</span>
+                                                    </div>
+                                                @endif
 
-                        <div class="mb-3">
-                            <h5 class="text-muted">Kontakt na matku</h5>
-                            <p><strong>Jméno:</strong> {{ $data->mother_name ?? '' }} {{ $data->mother_surname ?? '' }}</p>
-                            <p><strong>Telefon:</strong> {{ $data->mother_telephone ?? '' }}</p>
-                            <p><strong>Email:</strong> {{ $data->mother_email ?? '' }}</p>
-                        </div>
+                                                @if ($data->mother_email)
+                                                    <div class="list-group-item px-0 py-2 border-0 bg-transparent">
+                                                        <small class="text-muted d-block">Email</small>
+                                                        <span>{{ $data->mother_email }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
 
-                        <div class="mb-3">
-                            <h5 class="text-muted">Kontakt na otce</h5>
-                            <p><strong>Jméno:</strong> {{ $data->father_name ?? '' }} {{ $data->father_surname ?? '' }}
-                            </p>
-                            <p><strong>Telefon:</strong> {{ $data->father_telephone ?? '' }}</p>
-                            <p><strong>Email:</strong> {{ $data->father_email ?? '' }}</p>
-                        </div>
+                            @if ($data->father_name || $data->father_surname || $data->father_telephone || $data->father_email)
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 bg-light border-0">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar avatar-sm bg-primary-subtle text-primary me-3">
+                                                    <i class="ri-user-3-line"></i>
+                                                </div>
+                                                <h6 class="mb-0 text-dark">Kontakt na otce</h6>
+                                            </div>
 
-                        <div class="d-flex justify-content-center mt-3">
-                            <a href="#" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
-                                data-bs-target="#editMemberModal">
-                                <i class="ri-pencil-line"></i> Změnit
-                            </a>
-                            <form action="/member/{{ $data->members_id }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="ri-delete-bin-6-line"></i> Smazat
-                                </button>
+                                            <div class="list-group list-group-flush">
+                                                @if ($data->father_name || $data->father_surname)
+                                                    <div class="list-group-item px-0 py-2 border-0 bg-transparent">
+                                                        <small class="text-muted d-block">Jméno</small>
+                                                        <span>{{ $data->father_name ?? '' }}
+                                                            {{ $data->father_surname ?? '' }}</span>
+                                                    </div>
+                                                @endif
 
-                            </form>
-                            <button class="btn btn-primary btn-sm ms-2" onClick="history.back()" style="display:inline;"><i
-                                    class="ri-arrow-go-back-fill"></i> Zpátky</button>
+                                                @if ($data->father_telephone)
+                                                    <div class="list-group-item px-0 py-2 border-0 bg-transparent">
+                                                        <small class="text-muted d-block">Telefon</small>
+                                                        <span>{{ $data->father_telephone }}</span>
+                                                    </div>
+                                                @endif
+
+                                                @if ($data->father_email)
+                                                    <div class="list-group-item px-0 py-2 border-0 bg-transparent">
+                                                        <small class="text-muted d-block">Email</small>
+                                                        <span>{{ $data->father_email }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if (
+                                !($data->father_name || $data->father_surname || $data->father_telephone || $data->father_email) &&
+                                    !($data->mother_name || $data->mother_surname || $data->mother_telephone || $data->mother_email))
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <div class="mb-3">
+                                            <i class="ri-contacts-book-line text-primary" style="font-size: 3rem;"></i>
+                                        </div>
+                                        <h6 class="text-muted">Žádné kontaktní informace</h6>
+                                        <p class="small text-muted">Pro tohoto člena nebyly nalezeny žádné kontaktní
+                                            informace rodičů.</p>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        @if ($achievements->count() > 0)
-            <div class="col-12 mt-5">
-                <h3 class="text-center mb-4">Odborky ({{ $achievements->count() }})</h3>
-                <div class="row">
-                    @foreach ($achievements as $achievement)
-                        <div class="col-md-3 col-sm-4 col-6 mb-4">
-                            <div class="card shadow-sm rounded-3">
-                                <img class="rounded-3" width="100%" height="290px"
-                                    src="{{ asset('storage/achievements/' . $achievement->image) }}"
-                                    alt="Achievement Image" />
-                                <div class="card-body p-3">
-                                    <h5 class="card-title text-center" style="font-size: 1rem;">{{ $achievement->name }}
-                                    </h5>
-                                    <p class="text-muted" style="font-size: 0.875rem;">
-                                        {{ Str::limit($achievement->description, 60) }}</p>
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-dark">
+                            <i class="ri-award-line me-2 text-primary"></i>Odborky
+                            @if ($achievements->count() > 0)
+                                <span class="badge bg-primary text-white ms-2">{{ $achievements->count() }}</span>
+                            @endif
+                        </h5>
+                    </div>
 
-                                    @if ($achievement->achieved_at)
-                                        <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">
-                                            Dosáhnuto:
-                                            {{ \Carbon\Carbon::parse($achievement->achieved_at)->format('d.m.Y') }}
-                                        </small>
-                                    @endif
+                    <div class="card-body">
+                        @if ($achievements->count() > 0)
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                                @foreach ($achievements as $achievement)
+                                    <div class="col">
+                                        <div class="card h-100 border shadow-sm hover-shadow">
+                                            @if (file_exists(public_path('storage/achievements/' . $achievement->image)))
+                                                <img class="card-img-top" style="height: 180px; object-fit: cover;"
+                                                    src="{{ asset('storage/achievements/' . $achievement->image) }}"
+                                                    alt="{{ $achievement->name }}" />
+                                            @else
+                                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                                    style="height: 180px;">
+                                                    <i class="ri-award-fill text-primary" style="font-size: 4rem;"></i>
+                                                </div>
+                                            @endif
+
+                                            <div class="card-body">
+                                                <h5 class="card-title text-dark">{{ $achievement->name }}</h5>
+                                                <p class="card-text text-muted small">
+                                                    {{ Str::limit($achievement->description, 60) }}
+                                                </p>
+                                            </div>
+
+                                            @if ($achievement->achieved_at)
+                                                <div class="card-footer bg-transparent border-top-0">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="ri-calendar-check-line text-success me-2"></i>
+                                                        <small class="text-muted">
+                                                            Dosáhnuto:
+                                                            {{ \Carbon\Carbon::parse($achievement->achieved_at)->format('d.m.Y') }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <div class="mb-4">
+                                    <div class="rounded-circle bg-primary-subtle p-4 mx-auto" style="width: fit-content;">
+                                        <i class="ri-award-line text-primary" style="font-size: 3rem;"></i>
+                                    </div>
                                 </div>
+                                <h5 class="text-dark mb-2">Žádné odborky</h5>
+                                <p class="text-muted">Pro tohoto člena nebyly nalezeny žádné odborky.</p>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @else
-            <div class="col-12 mt-5">
-                <p class="text-center">Pro tohoto člena nebyli nalezeny žádné odborky.</p>
-            </div>
-        @endif
-    </div>
-
-    <!-- Edit Member Modal -->
-    <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editMemberModalLabel">Upravit člena</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ route('member.update', $data->members_id) }}" method="POST" id="editMemberForm">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Jméno</label>
-                                <input type="text" class="form-control" id="name" name="name"
-                                    value="{{ old('name', $data->name) }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="surname" class="form-label">Příjmení</label>
-                                <input type="text" class="form-control" id="surname" name="surname"
-                                    value="{{ old('surname', $data->surname) }}" required>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="age" class="form-label">Věk</label>
-                                <input type="number" class="form-control" id="age" name="age"
-                                    value="{{ old('age', $data->age) }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="shirt_size_id" class="form-label">Velikost trika</label>
-                                <select class="form-select" id="shirt_size_id" name="shirt_size_id">
-                                    <option value="">Vyberte velikost</option>
-                                    @foreach ($shirt_sizes as $size)
-                                        <option value="{{ $size->id }}"
-                                            {{ $size->id == old('shirt_size_id', $data->shirt_size_id) ? 'selected' : '' }}>
-                                            {{ $size->size }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="nickname" class="form-label">Přezdívka</label>
-                                <input type="text" class="form-control" id="nickname" name="nickname"
-                                    value="{{ old('nickname', $data->nickname) }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="telephone" class="form-label">Telefon</label>
-                                <input type="text" class="form-control" id="telephone" name="telephone"
-                                    value="{{ old('telephone', $data->telephone) }}">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    value="{{ old('email', $data->email) }}">
-                            </div>
-                        </div>
-
-                        <h6 class="mt-4">Kontakt na matku</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="mother_name" class="form-label">Jméno matky</label>
-                                <input type="text" class="form-control" id="mother_name" name="mother_name"
-                                    value="{{ old('mother_name', $data->mother_name) }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="mother_surname" class="form-label">Příjmení matky</label>
-                                <input type="text" class="form-control" id="mother_surname" name="mother_surname"
-                                    value="{{ old('mother_surname', $data->mother_surname) }}">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="mother_telephone" class="form-label">Telefon matky</label>
-                                <input type="text" class="form-control" id="mother_telephone" name="mother_telephone"
-                                    value="{{ old('mother_telephone', $data->mother_telephone) }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="mother_email" class="form-label">Email matky</label>
-                                <input type="email" class="form-control" id="mother_email" name="mother_email"
-                                    value="{{ old('mother_email', $data->mother_email) }}">
-                            </div>
-                        </div>
-
-                        <h6 class="mt-4">Kontakt na otce</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="father_name" class="form-label">Jméno otce</label>
-                                <input type="text" class="form-control" id="father_name" name="father_name"
-                                    value="{{ old('father_name', $data->father_name) }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="father_surname" class="form-label">Příjmení otce</label>
-                                <input type="text" class="form-control" id="father_surname" name="father_surname"
-                                    value="{{ old('father_surname', $data->father_surname) }}">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="father_telephone" class="form-label">Telefon otce</label>
-                                <input type="text" class="form-control" id="father_telephone" name="father_telephone"
-                                    value="{{ old('father_telephone', $data->father_telephone) }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="father_email" class="form-label">Email otce</label>
-                                <input type="email" class="form-control" id="father_email" name="father_email"
-                                    value="{{ old('father_email', $data->father_email) }}">
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
-                            <button type="submit" class="btn btn-primary">Upravit</button>
-                        </div>
-                    </form>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
+
+    <style>
+        .avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-weight: 500;
+        }
+
+        .avatar-xl {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+
+        .avatar-sm {
+            width: 36px;
+            height: 36px;
+            font-size: 0.875rem;
+        }
+    </style>
 @endsection

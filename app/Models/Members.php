@@ -27,7 +27,7 @@ class Members extends Model
         'father_surname',
         'father_telephone',
         'father_email',
-        
+
     ];
     use SoftDeletes;
     public function teams()
@@ -51,5 +51,13 @@ class Members extends Model
                                             ->first();
 
         return $attendance ? $attendance->status : null;
+    }
+    public function getAttendanceConfirmed($eventId)
+    {
+        $attendance = Attendance::where('member_id', $this->id)
+                                            ->where('event_id', $eventId)
+                                            ->first();
+
+        return $attendance ? $attendance->confirmed_by_parent : null;
     }
 }

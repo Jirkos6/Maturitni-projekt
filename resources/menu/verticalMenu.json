@@ -1,19 +1,48 @@
 {
   "menu": [
     {
+      "menuHeader": "Administrace"
+    },
+    {
       "url": "/",
       "name": "Hlavní panel",
       "icon": "menu-icon tf-icons ri-home-smile-line",
-      "slug": "dashboard",
-      "badge": [
-        "label-primary fs-tiny",
-        "Nové"
-      ]
+      "slug": "dashboard"
+    },
+    {
+      "url": "/shirt-sizes",
+      "name": "Velikosti trička",
+      "icon": "menu-icon tf-icons ri-t-shirt-fill",
+      "slug": "dashboard"
+    },
+    {
+      "url": "/achievements",
+      "name": "Odborky",
+      "icon": "menu-icon tf-icons ri-medal-line",
+      "slug": "dashboard"
+    },
+    {
+      "url": "/global-events",
+      "name": "Globální akce",
+      "icon": "menu-icon tf-icons ri-calendar-event-line",
+      "slug": "dashboard"
+    },
+    {
+      "menuHeader": "Uživatelské rozhraní"
     },
     {
       "url": "/dashboard",
       "name": "Rodičovský panel",
       "icon": "menu-icon tf-icons ri-parent-line",
+      "slug": "dashboard"
+    },
+    {
+      "menuHeader": "Development"
+    },
+    {
+      "url": "/telescope",
+      "name": "Telescope",
+      "icon": "menu-icon tf-icons ri-microscope-line",
       "slug": "dashboard"
     }
   ]

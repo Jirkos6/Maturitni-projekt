@@ -3,8 +3,6 @@ import './bootstrap';
 import { Calendar } from '@fullcalendar/core';
 import multiMonthPlugin from '@fullcalendar/multimonth';
 import rrulePlugin from '@fullcalendar/rrule';
-import $ from 'jquery';
-window.$ = window.jQuery = $;
 window.Calendar = Calendar;
 window.multiMonthPlugin = multiMonthPlugin;
 window.rrulePlugin = rrulePlugin;
@@ -20,8 +18,7 @@ window.timeGridPlugin = timeGridPlugin;
 
 import listPlugin from '@fullcalendar/list';
 window.listPlugin = listPlugin;
-
-
+import 'flowbite';
 import.meta.glob([
   '../assets/img/**',
   // '../assets/json/**',

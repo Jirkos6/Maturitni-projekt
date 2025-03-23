@@ -17,11 +17,10 @@ class EnsureUserHasAdminRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if the user is not authenticated or doesn't have the 'admin' role
         if (!$request->user() || !$request->user()->hasRole('admin')) {
-            return redirect('/dashboard'); // Redirect to dashboard if not an admin
+            return redirect('/dashboard');
         }
 
-        return $next($request); // Proceed to the next middleware/route
+        return $next($request);
     }
 }

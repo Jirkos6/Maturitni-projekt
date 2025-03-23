@@ -1,40 +1,59 @@
 @extends('layouts/app')
 
 @section('content')
-    <div class="mt-20 px-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center pt-12 pb-16 px-4 sm:px-6 lg:px-8 mt-12">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-light text-gray-800 dark:text-gray-100 tracking-wide">
+                Vaše děti
+            </h1>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Přehled
+            </p>
+        </header>
+        <div class="w-full max-w-2xl">
             @if ($data->isNotEmpty())
-                @foreach ($data as $item)
-                    <div class="rounded-xl bg-white dark:bg-gray-900 shadow-lg overflow-hidden">
-                        <div class="flex flex-col items-center p-6">
-                            <div
-                                class="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 p-1 shadow-lg">
-                                <svg class="w-full h-full rounded-full bg-gray-800 dark:bg-gray-700 p-2"
-                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                    <path
-                                        d="M16 2L21 7V21.0082C21 21.556 20.5551 22 20.0066 22H3.9934C3.44476 22 3 21.5447 3 21.0082V2.9918C3 2.44405 3.44495 2 3.9934 2H16ZM12 11.5C13.3807 11.5 14.5 10.3807 14.5 9C14.5 7.61929 13.3807 6.5 12 6.5C10.6193 6.5 9.5 7.61929 9.5 9C9.5 10.3807 10.6193 11.5 12 11.5ZM7.52746 17H16.4725C16.2238 14.75 14.3163 13 12 13C9.68372 13 7.77619 14.75 7.52746 17Z">
-                                    </path>
-                                </svg>
+                <ul class="space-y-4">
+                    @foreach ($data as $item)
+                        <li
+                            class="group flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 dark:hover:from-indigo-900/50 dark:hover:to-blue-900/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="relative w-10 h-10 flex-shrink-0">
+                                    <div
+                                        class="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-blue-500 p-0.5 ">
+                                        <div
+                                            class="w-full h-full rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300"
+                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                                <path
+                                                    d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $item->name }} {{ $item->surname }}
+                                    </h2>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        Oddíl: <span
+                                            class="font-medium text-green-600 dark:text-green-400">{{ $item->teams_name }}</span>
+                                    </p>
+                                </div>
                             </div>
-                            <h5 class="mt-4 text-lg font-semibold text-gray-800 dark:text-white text-center">
-                                {{ $item->name }} {{ $item->surname }}
-                            </h5>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">
-                                <strong>Oddíl:</strong> {{ $item->teams_name }}
-                            </span>
-                            <div class="mt-4">
-                                <a href="/dashboard/members/{{ $item->id }}"
-                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-500">
-                                    Zobrazit
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+                            <a href="{{ route('dashboard.members', $item->id) }}"
+                                class="inline-flex items-center px-3 py-1 text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-full hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200 group-hover:scale-105">
+                                Zobrazit
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
             @else
-                <h1 class="mt-10 text-4xl font-semibold text-gray-800 dark:text-white text-center">
-                    Nebyli vám přiřazeni žádní členové!
-                </h1>
+                <div class="text-center py-16">
+                    <h2 class="text-xl font-medium text-gray-700 dark:text-gray-200">
+                        Nebyli Vám přižazeny žádní skauti. Počkejte než je Vám vedení přidělí.
+                    </h2>
+                </div>
             @endif
         </div>
     </div>

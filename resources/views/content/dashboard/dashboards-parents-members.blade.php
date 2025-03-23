@@ -2,6 +2,14 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-10 lg:pl-72 mt-12">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-light text-gray-800 dark:text-gray-100 tracking-wide">
+                {{ $members->name }} {{ $members->surname }}
+            </h1>
+            <p class="text-xl font-light text-gray-800 dark:text-gray-100 tracking-wide mt-5">
+                Družina: {{ $teamname->name }}
+            </p>
+        </header>
         <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <div class="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -39,7 +47,7 @@
                     <div class="flex items-center justify-between">
                         <i class="ri-calendar-event-line text-green-500 text-4xl"></i>
                         <h2 class="text-2xl font-medium text-gray-800 dark:text-white font-sans">
-                            Události Oddílu
+                            Události Družiny
                             <strong class="align-content-center">{{ $teamname->name }}</strong>
                         </h2>
                     </div>

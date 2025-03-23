@@ -8,17 +8,19 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-class TestEmail extends Mailable
+class AccountCreated extends Mailable
 {
     use Queueable, SerializesModels;
     public $name;
     public $surname;
     public $password;
-    public function __construct($name, $surname, $password)
+    public $email;
+    public function __construct($name, $surname, $password, $email)
     {
         $this->name = $name;
         $this->surname = $surname;
         $this->password = $password;
+        $this->email = $email;
     }
     public function envelope(): Envelope
     {
