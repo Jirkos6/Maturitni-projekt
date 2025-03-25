@@ -1662,7 +1662,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="surname" class="form-label">Příjmení</label>
+                                                    <label for="surname" class="form-label">Příjmení <span
+                                                            class="text-danger">*</span></label>
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i class="ri-user-line"></i></span>
                                                         <input type="text" class="form-control" id="surname"
@@ -2499,16 +2500,13 @@
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i
                                                                 class="ri-group-line"></i></span>
-                                                        <div id="selectContainer">
-                                                            <select class="delete-event-team-select" id="bulkTeamSelect"
-                                                                name="team_ids[]" multiple="multiple">
-                                                                @foreach (Teams::all() as $team)
-                                                                    <option value="{{ $team->id }}">
-                                                                        {{ $team->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                        <select class="delete-event-team-select" id="bulkTeamSelect"
+                                                            name="team_ids[]" multiple="multiple">
+                                                            @foreach (Teams::all() as $team)
+                                                                <option value="{{ $team->id }}">
+                                                                    {{ $team->name }}</option>
+                                                            @endforeach
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>

@@ -1067,6 +1067,11 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@libphp/amazon-linux-2-v83@>=0.0.7":
+  version "0.0.7"
+  resolved "https://registry.npmjs.org/@libphp/amazon-linux-2-v83/-/amazon-linux-2-v83-0.0.7.tgz"
+  integrity sha512-hLiwDbRzTSsZ9TaRjdWO95mjJBaRYe5XfT18ok5ecDnzPrYY2S6vyo9nBZSjtcBJbWydRkTrd7hcoJrFNv/2GA==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz"
@@ -4899,6 +4904,13 @@ vary@^1:
   version "1.1.2"
   resolved "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
+
+vercel-php@^0.7.3:
+  version "0.7.3"
+  resolved "https://registry.npmjs.org/vercel-php/-/vercel-php-0.7.3.tgz"
+  integrity sha512-2ZWDmxXqqZ9HyvHi/qaUfjGu+gY22WFPy8NFdZFkjVmFthJzxBz93nWuPsVxOnb5zCZNcAyiaj4cXqhgvYLV1w==
+  dependencies:
+    "@libphp/amazon-linux-2-v83" ">=0.0.7"
 
 vite-plugin-full-reload@^1.1.0:
   version "1.2.0"

@@ -130,12 +130,23 @@
                                         </span>
                                     </div>
                                 </div>
-
                                 <div class="card-body text-center">
                                     <h5 class="card-title mb-3">{{ $team->name }}</h5>
-                                    <a href="/teams/{{ $team->id }}" class="btn btn-sm btn-primary stretched-link">
-                                        <i class="ri-eye-line me-1"></i> Zobrazit
-                                    </a>
+                                </div>
+                                <div class="card-footer bg-white border-0 pb-3 text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="/teams/{{ $team->id }}" class="btn btn-sm btn-primary">
+                                            <i class="ri-eye-line me-1"></i> Zobrazit
+                                        </a>
+                                        <form action="/team/{{ $team->id }}" method="POST"
+                                            onsubmit="return confirm('Opravdu chcete smazat tuto družinu?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="ri-delete-bin-6-line me-1"></i> Smazat
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

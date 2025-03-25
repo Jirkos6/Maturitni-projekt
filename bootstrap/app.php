@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     health: '/up',
   )
   ->withMiddleware(function (Middleware $middleware) {
-   $middleware->alias([
+   $middleware->trustProxies(at: '*')->alias([
     'user_has_admin' => EnsureUserHasAdminRole::class,
     'user_has_member' => EnsureUserHasMember::class,
 ]);

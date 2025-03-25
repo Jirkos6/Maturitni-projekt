@@ -24,7 +24,11 @@ $(document).ready(function () {
     dropdownParent: $('#eventAssignTeam')
   });
   $('.delete-event-team-select').select2({
-    dropdownParent: $('#multiEventEditModal'),
+    dropdownParent: $('#bulkEditForm'),
+    theme: 'bootstrap-5'
+  });
+  $('.team-select').select2({
+    dropdownParent: $('#eventForm'),
     theme: 'bootstrap-5'
   });
   $('#assignAchievementModal').on('show.bs.modal', function (e) {

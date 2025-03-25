@@ -45,6 +45,7 @@ Route::middleware([
     Route::get('/achievements', [AchievementController::class, 'showAchievements'])->name('achievements.show');
     Route::get('/shirt-sizes', [ShirtSizeController::class, 'showShirtSizes'])->name('shirt-sizes.show');
     Route::delete('/shirt-sizes/{id}', [ShirtSizeController::class, 'deleteShirtSize'])->name('shirt-sizes.delete');
+    Route::delete('/team/{id}', [TeamController::class, 'deleteTeam'])->name('team.delete');
     Route::post('/shirt-sizes', [ShirtSizeController::class, 'storeShirtSize'])->name('shirt-sizes.store');
     Route::get('/global-events', [EventController::class, 'showGlobalEvents'])->name('global-events.show');
     Route::post('/events/update-multiple', [EventController::class, 'updateMultipleEvents'])->name('events.update.multiple');

@@ -57,8 +57,16 @@ class EventController extends Controller
             ->get();
 
         $teams = Teams::all();
+        $members = $teams->pluck('members')->flatten()->unique('id');
+        $attendanceData = [];
+        foreach ($data as $event) {
+            $attendanceData[$event->id] = Attendance::where('event_id', $event->id)
+                ->with('member')
+                ->get()
+                ->groupBy('member_id');
+        }
 
-        return view('content.dashboard.dashboards-global-events', compact('data', 'teams'));
+        return view('content.dashboard.dashboards-global-events', compact('data', 'teams', 'members', 'attendanceData'));
     }
 
     public function storeEvent(Request $request)

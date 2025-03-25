@@ -9,7 +9,7 @@ use App\Models\Events;
 use App\Models\Achievements;
 use App\Models\Attendance;
 use App\Models\EventTeam;
-use App\Models\MemberTeam;
+use App\Models\MembersTeam;
 use App\Models\MemberAchievement;
 use App\Models\User;
 use App\Models\ShirtSizes;
@@ -144,5 +144,21 @@ class TeamController extends Controller
             'id1' => $id,
             'presence' => $events,
         ]);
+    }
+    public function deleteTeam($id)
+    {
+        try {
+            $team = Teams::findOrFail($id);
+            $eventIds = EventTeam::where('team_id', $id)->pluck('event_id');
+            Events::whereIn('id', $eventIds)->delete();
+            EventTeam::where('team_id', $id)->delete();
+            $memberIds = MembersTeam::where('team_id', $id)->pluck('member_id');
+            Members::whereIn('id', $memberIds)->delete();
+            MembersTeam::where('team_id', $id)->delete();
+            $team->delete();
+            return redirect('/')->with('success', 'Družina úspěšně smazána.');
+        } catch (Exception $e) {
+            return redirect('/')->with('error', 'Nastala chyba při mazání družiny.');
+        }
     }
 }
