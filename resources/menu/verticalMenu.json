@@ -35,15 +35,6 @@
       "name": "Rodičovský panel",
       "icon": "menu-icon tf-icons ri-parent-line",
       "slug": "dashboard"
-    },
-    {
-      "menuHeader": "Development"
-    },
-    {
-      "url": "/telescope",
-      "name": "Telescope",
-      "icon": "menu-icon tf-icons ri-microscope-line",
-      "slug": "dashboard"
     }
   ]
 }

@@ -86,6 +86,7 @@ class AchievementController extends Controller
             'achievement_id.*' => 'exists:achievements,id',
         ]);
 
+        MembersAchievement::where('member_id', $validated['member_id'])->delete();
         foreach ($validated['achievement_id'] as $achievementId) {
             MembersAchievement::create([
                 'member_id' => $validated['member_id'],
@@ -93,11 +94,21 @@ class AchievementController extends Controller
             ]);
         }
 
-        $request->session()->flash('success', "Odborky úspěšně přidány!");
+        return response()->json(['success' => true, 'message' => 'Odborky úspěšně přidány!']);
     }
     public function showAchievements()
     {
       $data = Achievements::All();
       return view('content.dashboard.dashboards-achievements',compact('data'));
+    }
+
+
+    public function getMemberAchievements($id)
+    {
+        $achievements = MembersAchievement::where('member_id', $id)
+            ->pluck('achievement_id')
+            ->toArray();
+
+        return response()->json($achievements);
     }
 }

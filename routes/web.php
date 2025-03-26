@@ -35,10 +35,12 @@ Route::middleware([
     Route::put('/achievement/{id}', [AchievementController::class, 'updateAchievement'])->name('achievements.update');
     Route::delete('/achievement/{id}', [AchievementController::class, 'deleteAchievement']);
     Route::post('/member-achievements', [AchievementController::class, 'assignMemberAchievements'])->name('member-achievements.store');
+    Route::get('/member-achievements/{id}', [AchievementController::class, 'getMemberAchievements'])->name('member-achievements.get');
     Route::post('/users', [UserController::class, 'storeUser'])->name('user.store');
     Route::delete('/user/{id}', [UserController::class, 'deleteUser']);
     Route::get('/user/{id}', [UserController::class, 'showUser'])->name('users.show');
     Route::post('/user-members', [UserController::class, 'assignMembersToUser'])->name('user-members.store');
+    Route::get('/user-members/{id}', [UserController::class, 'getUserMembers'])->name('user-members.get');
     Route::post('/users-role/{id}', [UserController::class, 'updateUserRole'])->name('users.role');
     Route::post('/update-attendance', [AttendanceController::class, 'updateAttendance'])->name('attendance.update');
     Route::get('/account/settings', [AccountSettingsAccount::class, 'index'])->name('dashboard-settings');

@@ -9,48 +9,101 @@ $(document).ready(function () {
   const repeatCountContainer = document.getElementById('repeatCountContainer');
   const recurrenceEndDateContainer = document.getElementById('recurrenceEndDateContainer');
   const dateOutputContainer = document.getElementById('dateOutputContainer');
-  const datesRemovedOutputContainer = document.getElementById('datesRemovedOutputContainer');
+  if (repeatCountContainer) {
+    repeatCountContainer.style.display = 'none';
+  }
+  if (recurrenceEndDateContainer) {
+    recurrenceEndDateContainer.style.display = 'block';
+  }
 
   $('.js-example-basic-multiple').select2({
     width: '300px',
-    dropdownParent: $('#memberAssignAchievement')
+    dropdownParent: $('#memberAssignAchievement'),
+    theme: 'bootstrap-5',
+    language: 'cs'
   });
   $('.js-basic-multiple').select2({
     width: '300px',
-    dropdownParent: $('#userAssignMember')
+    dropdownParent: $('#userAssignMember'),
+    theme: 'bootstrap-5',
+    language: 'cs'
   });
   $('.js-multiple').select2({
     width: '300px',
-    dropdownParent: $('#eventAssignTeam')
+    dropdownParent: $('#eventAssignTeam'),
+    theme: 'bootstrap-5',
+    language: 'cs'
   });
   $('.delete-event-team-select').select2({
     dropdownParent: $('#bulkEditForm'),
-    theme: 'bootstrap-5'
+    theme: 'bootstrap-5',
+    language: 'cs'
   });
   $('.team-select').select2({
     dropdownParent: $('#eventForm'),
-    theme: 'bootstrap-5'
+    theme: 'bootstrap-5',
+    language: 'cs'
   });
   $('#assignAchievementModal').on('show.bs.modal', function (e) {
     let button = $(e.relatedTarget);
     let memberId = button.data('member-id');
     $('#memberId').val(memberId);
+    $.ajax({
+      url: `/member-achievements/${memberId}`,
+      method: 'GET',
+      success: function (data) {
+        $('#achievementSelect').val(data).trigger('change');
+      },
+      error: function (xhr) {
+        console.error('Error fetching achievements:', xhr.responseText);
+      }
+    });
   });
 
   $('#assignMemberModal').on('show.bs.modal', function (e) {
     let button = $(e.relatedTarget);
     let userId = button.data('user-id');
     $('#userId').val(userId);
+    $.ajax({
+      url: `/user-members/${userId}`,
+      method: 'GET',
+      success: function (data) {
+        $('#memberSelect').val(data).trigger('change');
+      },
+      error: function (xhr) {
+        console.error('Error fetching members:', xhr.responseText);
+      }
+    });
   });
 
   $('#reccuringCheckbox').on('change', function (e) {
+    console.log('Checkbox changed:', this.checked);
+    console.log('recurrenceEndDateContainer:', document.getElementById('recurrenceEndDateContainer'));
+    console.log('repeatCountContainer:', document.getElementById('repeatCountContainer'));
+
     if (this.checked) {
       $('#recurrenceEndDate').val('');
+      $('#recurrenceRepeatCount').prop('disabled', false);
+      $('#recurrenceEndDate').prop('disabled', true);
+
+      if (document.getElementById('repeatCountContainer')) {
+        document.getElementById('repeatCountContainer').style.display = 'block';
+      }
+      if (document.getElementById('recurrenceEndDateContainer')) {
+        document.getElementById('recurrenceEndDateContainer').style.display = 'none';
+      }
     } else {
       $('#recurrenceRepeatCount').val('');
+      $('#recurrenceRepeatCount').prop('disabled', true);
+      $('#recurrenceEndDate').prop('disabled', false);
+
+      if (document.getElementById('repeatCountContainer')) {
+        document.getElementById('repeatCountContainer').style.display = 'none';
+      }
+      if (document.getElementById('recurrenceEndDateContainer')) {
+        document.getElementById('recurrenceEndDateContainer').style.display = 'block';
+      }
     }
-    repeatCountContainer.classList.toggle('d-none');
-    recurrenceEndDateContainer.classList.toggle('d-none');
     resetDateDisplays();
   });
 
@@ -65,9 +118,7 @@ $(document).ready(function () {
 
   function resetDateDisplays() {
     $('#dateOutput').empty();
-    $('#datesRemovedOutput').empty();
     dateOutputContainer.classList.add('d-none');
-    datesRemovedOutputContainer.classList.add('d-none');
   }
 
   $('#recurrenceEndDate, #recurrenceRepeatCount, #recurrenceType, #interval, #startDate').on('change', function () {
@@ -94,10 +145,19 @@ $(document).ready(function () {
   });
 
   $('#recurrenceType').on('change', function () {
+    console.log('Recurrence type changed:', $(this).val());
     let recurrenceType = getInputValue('#recurrenceType');
     const recurringOptions = document.getElementById('recurringOptions');
+
     if (recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') {
       recurringOptions.style.display = 'block';
+      if (document.getElementById('recurrenceEndDateContainer')) {
+        document.getElementById('recurrenceEndDateContainer').style.display = 'block';
+      }
+      if (document.getElementById('repeatCountContainer')) {
+        document.getElementById('repeatCountContainer').style.display = 'none';
+      }
+      $('#reccuringCheckbox').prop('checked', false);
     } else {
       recurringOptions.style.display = 'none';
       setInputValue('#interval', '');
@@ -126,10 +186,10 @@ $(document).ready(function () {
         achievement_id: achievementIds
       },
       headers: {
-        'X-CSRF-Token': $('meta[name="_token"]').attr('content')
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
       },
       success: function (response) {
-        alert('Odborky byly úspěšně přidány.');
+        alert(response.message || 'Odborky byly úspěšně přidány.');
         $('#assignAchievementModal').modal('hide');
         $('#addAchievementForm')[0].reset();
         $('.js-example-basic-multiple').val(null).trigger('change');
@@ -159,10 +219,10 @@ $(document).ready(function () {
         member_id: memberIds
       },
       headers: {
-        'X-CSRF-Token': $('meta[name="_token"]').attr('content')
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
       },
       success: function (response) {
-        alert('Členi byly úspěšně přiřazeni.');
+        alert(response.message || 'Členové byli úspěšně přiřazeni.');
         $('#assignMemberModal').modal('hide');
         $('#assignMemberForm')[0].reset();
         $('.js-basic-multiple').val(null).trigger('change');
@@ -637,152 +697,6 @@ function updateAttendance(selectElement) {
       setTimeout(() => $(selectElement).removeClass('error-feedback'), 1000);
     }
   });
-}
-
-function generateRecurrenceDates(startDate, recurrenceType, interval, endDate = null, repeatCount = null) {
-  const dateOutputContainer = document.getElementById('dateOutputContainer');
-  const datesRemovedOutputContainer = document.getElementById('datesRemovedOutputContainer');
-  const filterOutHolidays = $('#filterOutHolidayDates').is(':checked');
-
-  $('#dateOutput').empty();
-  $('#datesRemovedOutput').empty();
-  dateOutputContainer.classList.add('d-none');
-  datesRemovedOutputContainer.classList.add('d-none');
-
-  let dates = [];
-  let currentDate = new Date(startDate);
-  let maxDate = endDate ? new Date(endDate) : null;
-  let maxOccurrences = repeatCount ? Math.max(1, repeatCount) : 50;
-
-  if (isNaN(currentDate.getTime())) {
-    console.error('Neplatné datum začátku:', startDate);
-    return;
-  }
-
-  const MAX_EVENTS = 50;
-
-  while (dates.length < maxOccurrences && (!maxDate || currentDate <= maxDate) && dates.length < MAX_EVENTS) {
-    dates.push(new Date(currentDate));
-    if (recurrenceType === 'daily') {
-      currentDate.setDate(currentDate.getDate() + interval);
-    } else if (recurrenceType === 'weekly') {
-      currentDate.setDate(currentDate.getDate() + interval * 7);
-    } else if (recurrenceType === 'monthly') {
-      currentDate.setMonth(currentDate.getMonth() + interval);
-    }
-  }
-
-  let dateList = dates
-    .filter(date => date instanceof Date && !isNaN(date.getTime()))
-    .map(date => date.toISOString().split('T')[0]);
-
-  if (dateList.length === 0) {
-    console.error('Špatný vstup.');
-    return;
-  }
-
-  if (dates.length >= MAX_EVENTS && (!maxDate || currentDate <= maxDate) && maxOccurrences > MAX_EVENTS) {
-    const warningEl = document.createElement('div');
-    warningEl.className = 'alert alert-warning mt-3';
-    warningEl.innerHTML = '<i class="ri-error-warning-line me-2"></i>Počet opakování byl omezen na maximálně 50 akcí.';
-    dateOutputContainer.parentNode.insertBefore(warningEl, dateOutputContainer);
-  }
-
-  function displayDates(finalDates) {
-    if (finalDates.length > 0) {
-      dateOutputContainer.classList.remove('d-none');
-      const maxDisplay = Math.min(finalDates.length, 6);
-      for (let i = 0; i < maxDisplay; i++) {
-        $('#dateOutput').append(
-          `<li class="list-group-item bg-light text-dark border-0 py-2">
-            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-              <span class="text-wrap">${returnDay(new Date(finalDates[i]).getDay())} ${formatDate(finalDates[i])}</span>
-            </div>
-          </li>`
-        );
-      }
-      if (finalDates.length > 6) {
-        $('#dateOutput').append(
-          `<li class="list-group-item text-muted bg-light border-0 py-2 fst-italic">
-            A ${finalDates.length - 6} dalších...
-          </li>`
-        );
-      }
-    }
-  }
-  if (!filterOutHolidays) {
-    displayDates(dateList);
-    return;
-  }
-  let last = dateList[dateList.length - 1];
-  let difference = Math.max(0, Math.floor((new Date(last) - new Date(startDate)) / (1000 * 60 * 60 * 24)));
-
-  $.ajax({
-    dataType: 'json',
-    url: `https://svatkyapi.cz/api/day/${startDate}/interval/${difference}`,
-    type: 'GET',
-    success: function (response) {
-      let removedDates = new Map();
-
-      if (response && Array.isArray(response)) {
-        response.forEach(item => {
-          if (item.holidayName && dateList.includes(item.date)) {
-            removedDates.set(item.date, item.holidayName);
-          }
-        });
-      }
-
-      let finalDates = dateList.filter(date => !removedDates.has(date));
-      displayDates(finalDates);
-      if (removedDates.size > 0) {
-        datesRemovedOutputContainer.classList.remove('d-none');
-        removedDates.forEach((holidayName, date) => {
-          $('#datesRemovedOutput').append(
-            `<li class="list-group-item bg-warning-subtle text-dark border-0 py-2">
-              <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-                <span class="text-wrap">${returnDay(new Date(date).getDay())} ${formatDate(date)}</span>
-                <span class="badge bg-warning text-dark text-wrap mt-1 mt-md-0">${holidayName}</span>
-              </div>
-            </li>`
-          );
-        });
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error('Error:', error);
-      displayDates(dateList);
-    }
-  });
-}
-
-function formatDate(dateStr) {
-  const date = new Date(dateStr);
-  return date
-    .toLocaleDateString('cs-CZ', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
-    .replace(/\s/g, '');
-}
-
-function returnDay(dateInt) {
-  switch (dateInt) {
-    case 0:
-      return 'Neděle';
-    case 1:
-      return 'Pondělí';
-    case 2:
-      return 'Úterý';
-    case 3:
-      return 'Středa';
-    case 4:
-      return 'Čtvrtek';
-    case 5:
-      return 'Pátek';
-    case 6:
-      return 'Sobota';
-  }
 }
 
 window.filterEvents = filterEvents;

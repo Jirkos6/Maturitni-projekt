@@ -1,15 +1,4 @@
 <?php return array (
-  'barryvdh/laravel-debugbar' => 
-  array (
-    'aliases' => 
-    array (
-      'Debugbar' => 'Barryvdh\\Debugbar\\Facades\\Debugbar',
-    ),
-    'providers' => 
-    array (
-      0 => 'Barryvdh\\Debugbar\\ServiceProvider',
-    ),
-  ),
   'laravel/fortify' => 
   array (
     'providers' => 
@@ -22,18 +11,6 @@
     'providers' => 
     array (
       0 => 'Laravel\\Jetstream\\JetstreamServiceProvider',
-    ),
-  ),
-  'laravel/reverb' => 
-  array (
-    'aliases' => 
-    array (
-      'Output' => 'Laravel\\Reverb\\Output',
-    ),
-    'providers' => 
-    array (
-      0 => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
-      1 => 'Laravel\\Reverb\\ReverbServiceProvider',
     ),
   ),
   'laravel/sail' => 
@@ -61,13 +38,6 @@
       0 => 'Laravel\\Socialite\\SocialiteServiceProvider',
     ),
   ),
-  'laravel/telescope' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Laravel\\Telescope\\TelescopeServiceProvider',
-    ),
-  ),
   'laravel/tinker' => 
   array (
     'providers' => 
@@ -84,17 +54,6 @@
     'providers' => 
     array (
       0 => 'Livewire\\LivewireServiceProvider',
-    ),
-  ),
-  'mailersend/laravel-driver' => 
-  array (
-    'aliases' => 
-    array (
-      'LaravelDriver' => 'MailerSend\\LaravelDriver\\LaravelDriverFacade',
-    ),
-    'providers' => 
-    array (
-      0 => 'MailerSend\\LaravelDriver\\LaravelDriverServiceProvider',
     ),
   ),
   'mailjet/laravel-mailjet' => 
@@ -127,17 +86,6 @@
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    ),
-  ),
-  'spatie/laravel-google-calendar' => 
-  array (
-    'aliases' => 
-    array (
-      'GoogleCalendar' => 'Spatie\\GoogleCalendar\\GoogleCalendarFacade',
-    ),
-    'providers' => 
-    array (
-      0 => 'Spatie\\GoogleCalendar\\GoogleCalendarServiceProvider',
     ),
   ),
   'spatie/laravel-ignition' => 

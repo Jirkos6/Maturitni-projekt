@@ -64,30 +64,25 @@ class UserController extends Controller
         }
     }
 
+
     public function assignMembersToUser(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'member_id' => 'required|array',
-                'member_id.*' => 'exists:members,id',
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'member_id' => 'required|array',
+            'member_id.*' => 'exists:members,id',
+        ]);
+
+        UserMember::where('user_id', $validated['user_id'])->delete();
+
+        foreach ($validated['member_id'] as $memberId) {
+            UserMember::create([
+                'user_id' => $validated['user_id'],
+                'member_id' => $memberId,
             ]);
-            $userMembers = UserMember::where('user_id', $validated['user_id'])->get();
-            if ($userMembers->isNotEmpty()) {
-                foreach ($userMembers as $u) {
-                    $u->delete();
-                }
-            }
-            foreach ($validated['member_id'] as $memberId) {
-                UserMember::create(['user_id' => $validated['user_id'],'member_id' => $memberId]);
-            }
-            $request->session()->flash('success', "Členi úspěšně přiděleni!");
-            return redirect()->back()->withFragment('#navs-pills-top-parents');
-        } catch (\Exception $e) {
-            $request->session()->flash('error', "Nastala chyba při přidělování členů! " . $e->getMessage());
-            error_log($e);
-            return redirect()->back()->withFragment('#navs-pills-top-parents');
         }
+
+        return response()->json(['success' => true, 'message' => 'Členové úspěšně přiřazeni!']);
     }
 
     public function updateUserRole($id, Request $request)
@@ -166,5 +161,17 @@ class UserController extends Controller
         return redirect('/login');
 
       }
+    }
+
+    /**
+     * Get all members assigned to a user
+     */
+    public function getUserMembers($id)
+    {
+        $members = UserMember::where('user_id', $id)
+            ->pluck('member_id')
+            ->toArray();
+
+        return response()->json($members);
     }
 }

@@ -44,8 +44,8 @@ class TeamController extends Controller
 
     public function showTeam($id)
     {
-        $team = Teams::findOrFail($id);
-        $members = $team->members()->get();
+        $data = Teams::findOrFail($id);
+        $members = $data->members()->get();
         $eventCount = Events::join('event_team', 'events.id', '=', 'event_team.event_id')
             ->where('event_team.team_id', $id)
             ->count();
@@ -127,7 +127,7 @@ class TeamController extends Controller
         $calendarEventsJson = $calendarEvents->toJson();
 
         return view('content.dashboard.dashboards-teams', [
-            'data' => collect([$team]),
+            'data' => $data,
             'events' => $calendarEventsJson,
             'events1' => $events,
             'eventsCollection' => $events->sortBy('start_date'),

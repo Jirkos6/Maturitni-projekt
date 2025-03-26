@@ -33,7 +33,9 @@ a.fc-event.fc-daygrid-event[href] {
 a.fc-event.fc-daygrid-event[href]:visited {
   color: #b380ff;
 }
-
+.fc-list-event:hover {
+  background-color: inherit !important;
+}
 .fc .fc-daygrid-day.fc-day-other {
   background: var(--fc-neutral-bg-color);
 }

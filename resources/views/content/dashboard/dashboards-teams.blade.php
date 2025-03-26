@@ -258,68 +258,71 @@
                                         data-bs-target="#eventModal">
                                         <i class="ri-add-line me-1"></i> Přidat akci
                                     </button>
-                                    <button type="button" class="btn btn-outline-primary" id="bulkEditButton"
-                                        data-bs-toggle="modal" data-bs-target="#multiEventEditModal">
-                                        <i class="ri-edit-2-line me-1"></i> Hromadná úprava
-                                    </button>
-                                    <button type="button" class="btn btn-outline-danger" id="bulkDeleteButton"
-                                        data-bs-toggle="modal" data-bs-target="#multiEventDeleteModal">
-                                        <i class="ri-delete-bin-line me-1"></i> Hromadné mazání
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-4">
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <div class="card border-0 shadow-sm h-100 bg-gradient-light">
-                                <div class="card-body d-flex align-items-center">
-                                    <div class="rounded-circle bg-warning p-3 bg-opacity-10  me-3">
-                                        <i class="ri-calendar-event-line text-warning fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="card-subtitle mb-1 text-muted">Počet akcí</h6>
-                                        <h4 class="card-title mb-0">{{ $eventsCollection->count() }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <div class="card border-0 shadow-sm h-100 bg-gradient-light">
-                                <div class="card-body d-flex align-items-center">
-                                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
-                                        <i class="ri-calendar-check-line text-success fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="card-subtitle mb-1 text-muted">Nadcházející akce</h6>
-                                        <h4 class="card-title mb-0">
-                                            {{ $eventsCollection->filter(function ($event) {
-                                                    return Carbon::parse($event->start)->isFuture();
-                                                })->count() }}
-                                        </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <div class="card border-0 shadow-sm h-100 bg-gradient-light">
-                                <div class="card-body d-flex align-items-center">
-                                    <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
-                                        <i class="ri-time-line text-info fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="card-subtitle mb-1 text-muted">Tento měsíc</h6>
-                                        <h4 class="card-title mb-0">
-                                            {{ $eventsCollection->filter(function ($event) {
-                                                    return Carbon::parse($event->start)->month === Carbon::now()->month;
-                                                })->count() }}
-                                        </h4>
-                                    </div>
+                                    @if ($eventsCollection->count() !== 0)
+                                        <button type="button" class="btn btn-outline-primary" id="bulkEditButton"
+                                            data-bs-toggle="modal" data-bs-target="#multiEventEditModal">
+                                            <i class="ri-edit-2-line me-1"></i> Hromadná úprava
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" id="bulkDeleteButton"
+                                            data-bs-toggle="modal" data-bs-target="#multiEventDeleteModal">
+                                            <i class="ri-delete-bin-line me-1"></i> Hromadné mazání
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
                     @if ($eventsCollection->count() !== 0)
+                        <div class="row mb-4">
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="card border-0 shadow-sm h-100 bg-gradient-light">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="rounded-circle bg-warning p-3 bg-opacity-10  me-3">
+                                            <i class="ri-calendar-event-line text-warning fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="card-subtitle mb-1 text-muted">Počet akcí</h6>
+                                            <h4 class="card-title mb-0">{{ $eventsCollection->count() }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="card border-0 shadow-sm h-100 bg-gradient-light">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                                            <i class="ri-calendar-check-line text-success fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="card-subtitle mb-1 text-muted">Nadcházející akce</h6>
+                                            <h4 class="card-title mb-0">
+                                                {{ $eventsCollection->filter(function ($event) {
+                                                        return Carbon::parse($event->start_date)->isFuture();
+                                                    })->count() }}
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="card border-0 shadow-sm h-100 bg-gradient-light">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                                            <i class="ri-time-line text-info fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="card-subtitle mb-1 text-muted">Tento měsíc</h6>
+                                            <h4 class="card-title mb-0">
+                                                {{ $eventsCollection->filter(function ($event) {
+                                                        return Carbon::parse($event->start_date)->month === Carbon::now()->month;
+                                                    })->count() }}
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <div class="card border-0 shadow-sm">
@@ -385,8 +388,8 @@
                                     <tbody class="event-list">
                                         @foreach ($eventsCollection as $event)
                                             @php
-                                                $startDate = Carbon::parse($event->start);
-                                                $endDate = Carbon::parse($event->end);
+                                                $startDate = Carbon::parse($event->start_date);
+                                                $endDate = Carbon::parse($event->end_date);
                                                 $isUpcoming = $startDate->isFuture();
                                                 $isPast = $startDate->isPast();
                                                 $statusClass = $isUpcoming
@@ -396,7 +399,7 @@
                                                         : 'bg-warning-subtle');
                                             @endphp
                                             <tr class="event-item {{ $statusClass }}" data-title="{{ $event->title }}"
-                                                data-start="{{ $event->start }}" data-end="{{ $event->end }}"
+                                                data-start="{{ $event->start_date }}" data-end="{{ $event->end_date }}"
                                                 data-id="{{ $event->id }}">
                                                 <td class="ps-4">
                                                     <a href="/events/{{ $event->id }}"
@@ -478,13 +481,13 @@
                             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 event-cards">
                                 @foreach ($eventsCollection as $event)
                                     @php
-                                        $startDate = Carbon::parse($event->start);
-                                        $endDate = Carbon::parse($event->end);
+                                        $startDate = Carbon::parse($event->start_date);
+                                        $endDate = Carbon::parse($event->end_date);
                                         $isUpcoming = $startDate->isFuture();
                                         $isPast = $startDate->isPast();
                                     @endphp
                                     <div class="col event-item" data-title="{{ $event->title }}"
-                                        data-start="{{ $event->start }}" data-end="{{ $event->end }}"
+                                        data-start="{{ $event->start_date }}" data-end="{{ $event->end_date }}"
                                         data-id="{{ $event->id }}">
                                         <div class="card h-100 border-0 shadow-sm hover-shadow">
                                             <div class="card-header bg-white text-white">
@@ -630,8 +633,7 @@
                                     <div class="row g-0">
                                         <div class="col-md-5">
                                             <img class="img-fluid h-100 object-fit-cover"
-                                                src="{{ asset('https://assets.grok.com/users/1d9ba289-0702-422d-9d57-92fd56372e21/pwomf3DuY0qK9ndW-generated_image.jpg') }}"
-                                                alt="Event Image">
+                                                src="{{ asset('storage/skaut.jpg') }}" alt="Event Image">
                                         </div>
                                         <div class="col-md-7">
                                             <div class="card-body">
@@ -694,7 +696,7 @@
                                         <h5 class="card-title">Nadcházející akce</h5>
                                         <p class="card-text fs-4 fw-bold text-info">
                                             {{ $eventsCollection->filter(function ($event) {
-                                                    return Carbon::parse($event->start)->isFuture();
+                                                    return Carbon::parse($event->start_date)->isFuture();
                                                 })->count() }}
                                         </p>
                                     </div>
@@ -1289,7 +1291,6 @@
                 </div>
                 <div class="tab-pane fade h-100" id="navs-pills-top-presence" role="tabpanel">
                     @if ($attendance->first())
-                        <!-- Attendance Dashboard Header -->
                         <div class="card mb-4">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -2018,13 +2019,6 @@
                                                 </div>
                                                 <div class="mb-3 form-check">
                                                     <input type="checkbox" class="form-check-input"
-                                                        id="filterOutHolidayDates" name="filterOutHolidayDates">
-                                                    <label class="form-check-label" for="filterOutHolidayDates">Vynechat
-                                                        svátky
-                                                    </label>
-                                                </div>
-                                                <div class="mb-3 form-check">
-                                                    <input type="checkbox" class="form-check-input"
                                                         id="reccuringCheckbox" name="recurrenceCheckbox">
                                                     <label class="form-check-label" for="reccuringCheckbox">Použít počet
                                                         opakování</label>
@@ -2062,7 +2056,7 @@
                                                         akcí.</small>
                                                 </div>
                                                 <div class="row gy-4">
-                                                    <div class="col-12 col-md-6">
+                                                    <div class="col-12">
                                                         <div class="mb-3 d-none" id="dateOutputContainer">
                                                             <h6 class="mb-2 text-primary">
                                                                 <i class="ri-calendar-event-line me-2"></i>Náhled akce
@@ -2070,20 +2064,6 @@
                                                             <div class="card shadow-sm">
                                                                 <div class="card-body p-3">
                                                                     <ul id="dateOutput"
-                                                                        class="list-group list-group-flush rounded"></ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <div class="mb-3 d-none" id="datesRemovedOutputContainer">
-                                                            <h6 class="mb-2 text-warning">
-                                                                <i class="ri-calendar-close-line me-2"></i>Vynechané
-                                                                termíny
-                                                            </h6>
-                                                            <div class="card shadow-sm">
-                                                                <div class="card-body p-3">
-                                                                    <ul id="datesRemovedOutput"
                                                                         class="list-group list-group-flush rounded"></ul>
                                                                 </div>
                                                             </div>
@@ -2105,7 +2085,8 @@
                                                     name="sendMailCheckbox">
                                                 <label class="form-check-label" for="sendMailCheckbox">Zaslat e-mail
                                                     všem
-                                                    rodičům?</label>
+                                                    rodičům? (Použijí se e-maily definované u členů družin: Email otce,
+                                                    Email matky)</label>
                                             </div>
                                         </div>
                                     </div>
@@ -2791,7 +2772,5 @@
                         </div>
                     </div>
                 </div>
-                @push('scripts')
-                    <script type="module" src="/resources/js/app.js"></script>
-                @endpush
+
             @endsection

@@ -121,8 +121,7 @@ class EventController extends Controller
             $emailCount = 0;
             $recurringEndDate = $endDate ? Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay() : null;
             $estimatedEventCount = 1;
-
-            if ($recurrenceType) {
+            if ($recurrenceType && ($repeatCount > 0 || $recurringEndDate)) {
                 if ($repeatCount > 0) {
                     $estimatedEventCount = $repeatCount;
                 } else if ($recurringEndDate) {
@@ -145,15 +144,17 @@ class EventController extends Controller
             if ($estimatedEventCount > 50) {
                 throw new \Exception('Počet opakovaných akcí nesmí překročit 50. Odhadovaný počet: ' . $estimatedEventCount);
             }
-
-            $eventDates = $this->generateRecurringDates(
-                $startDateTime,
-                $recurrenceType,
-                $interval,
-                $recurringEndDate,
-                $repeatCount,
-                $filterOutHolidays
-            );
+            if (!$recurrenceType || !($repeatCount > 0 || $recurringEndDate)) {
+                $eventDates = [$startDateTime];
+            } else {
+                $eventDates = $this->generateRecurringDates(
+                    $startDateTime,
+                    $recurrenceType,
+                    $interval,
+                    $recurringEndDate,
+                    $repeatCount
+                );
+            }
 
             if (empty($eventDates)) {
                 throw new \Exception('Nepodařilo se vygenerovat žádné datum události. Všechny termíny kolidují se svátky.');
@@ -223,91 +224,46 @@ class EventController extends Controller
             return redirect()->back()->withInput();
         }
     }
-
-    private function generateRecurringDates($startDate, $recurrenceType, $interval, $endDate, $repeatCount, $filterOutHolidays)
+    private function generateRecurringDates($startDate, $recurrenceType, $interval, $endDate, $repeatCount)
     {
-        if (!$recurrenceType || (!$repeatCount && !$endDate)) {
-            return [$startDate->copy()];
+        if (!$recurrenceType || (!$endDate && !$repeatCount)) {
+            return [$startDate];
         }
 
+        $interval = max(1, intval($interval));
         $dates = [];
-        $currentDate = $startDate->copy();
+        $currentDate = Carbon::parse($startDate);
+        $endDateTime = $endDate ? Carbon::parse($endDate) : null;
         $count = 0;
-        $maxOccurrences = $repeatCount ? min(50, $repeatCount) : 50;
+        $maxEvents = $repeatCount ? min(50, $repeatCount) : ($endDateTime ? 50 : 1);
 
-        while ($count < $maxOccurrences && (!$endDate || $currentDate <= $endDate)) {
+        while ($count < $maxEvents) {
+            if ($count > 0) {
+                switch ($recurrenceType) {
+                    case 'daily':
+                        $currentDate->addDays($interval);
+                        break;
+                    case 'weekly':
+                        $currentDate->addWeeks($interval);
+                        break;
+                    case 'monthly':
+                        $currentDate->addMonths($interval);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if ($endDateTime && $currentDate->greaterThan($endDateTime)) {
+                break;
+            }
             $dates[] = $currentDate->copy();
             $count++;
-
-            if ($count >= $maxOccurrences) {
-                break;
-            }
-
-            switch ($recurrenceType) {
-                case 'daily':
-                    $currentDate = $startDate->copy()->addDays($interval * $count);
-                    break;
-                case 'weekly':
-                    $currentDate = $startDate->copy()->addWeeks($interval * $count);
-                    break;
-                case 'monthly':
-                    $currentDate = $startDate->copy()->addMonths($interval * $count);
-                    break;
-                default:
-                    break 2;
-            }
-
-            if ($endDate && $currentDate > $endDate) {
+            if ($repeatCount && $count >= $repeatCount) {
                 break;
             }
         }
 
-
-        if (!$filterOutHolidays) {
-            return $dates;
-        }
-
-        try {
-            $startDateStr = $startDate->format('Y-m-d');
-            $lastDate = end($dates) ?: $startDate;
-            $daysDifference = $startDate->diffInDays($lastDate);
-
-            if ($daysDifference <= 0) {
-                return $dates;
-            }
-
-            $response = Http::timeout(10)->get("https://svatkyapi.cz/api/day/{$startDateStr}/interval/{$daysDifference}");
-
-            if ($response->failed()) {
-                return $dates;
-            }
-
-            $holidayData = $response->json();
-
-            $holidays = collect($holidayData)
-                ->filter(function($day) {
-                    return $day['isHoliday'] === true;
-                })
-                ->pluck('date')
-                ->toArray();
-
-
-            if (empty($holidays)) {
-                return $dates;
-            }
-
-            $filteredDates = array_values(array_filter($dates, function ($date) use ($holidays) {
-                return !in_array($date->format('Y-m-d'), $holidays);
-            }));
-
-            if (empty($filteredDates) && !empty($dates)) {
-                return [$startDate->copy()];
-            }
-
-            return $filteredDates;
-        } catch (\Exception $e) {
-            return $dates;
-        }
+        return $dates;
     }
     public function updateMultipleEvents(Request $request)
     {

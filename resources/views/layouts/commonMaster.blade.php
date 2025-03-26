@@ -28,8 +28,8 @@
 
 <body>
     @yield('layoutContent')
-    @include('layouts/contentFooterLayout')
     @include('layouts/sections/scripts')
 </body>
 
 </html>
+@include('layouts/contentFooterLayout')

@@ -9,6 +9,8 @@ use App\Models\Teams;
 use App\Models\Attendance;
 use App\Models\MembersTeam;
 use App\Models\UserMember;
+use Carbon\Carbon;
+
 class ParentDashboardController extends Controller
 {
     public function index(Request $request)
@@ -45,7 +47,7 @@ class ParentDashboardController extends Controller
                 : 0;
             $attendances = Attendance::join('events', 'attendance.event_id', '=', 'events.id')
                 ->where('attendance.member_id', $members->id)
-                ->where('events.start_date', '>=', \Carbon\Carbon::now())
+                ->where('events.start_date', '>=', Carbon::now())
                 ->whereNull('attendance.confirmed_by_parent')
                 ->orderBy('events.start_date', 'ASC')
                 ->select('attendance.*')
@@ -71,7 +73,7 @@ class ParentDashboardController extends Controller
             $upcomingeventcount = 0;
             if ($upcomingevents->first()) {
                 foreach ($upcomingevents as $e) {
-                    if (!\Carbon\Carbon::parse($e->start)->isPast()) {
+                    if (!Carbon::parse($e->start)->isPast()) {
                         $upcomingeventcount++;
                     }
                 }
@@ -84,7 +86,7 @@ class ParentDashboardController extends Controller
     {
         $members = Members::findOrFail($id);
             $achievements = Members::rightJoin('member_achievement', 'members.id', '=', 'member_achievement.member_id')
-                ->rightJoin('achievements', 'member_achievement.achievement_id', '=', 'achievements.id')
+                ->rightJoin('achievements', 'member_achievement.achievement_id', '=', 'achievements.id')->whereNull('member_achievement.deleted_at')
                 ->where('members.id', $id)->select('achievements.*')->orderBy('id', 'desc')->get();
             $attendance = Attendance::where('member_id', $id)->get();
             $attendancesum = $attendance->count();
@@ -111,14 +113,14 @@ class ParentDashboardController extends Controller
             $upcomingeventcount = 0;
             if ($upcomingevents->first()) {
                 foreach ($upcomingevents as $e) {
-                    if (!\Carbon\Carbon::parse($e->start)->isPast()) {
+                    if (!Carbon::parse($e->start)->isPast()) {
                         $upcomingeventcount++;
                     }
                 }
             }
             $attendances = Attendance::join('events', 'attendance.event_id', '=', 'events.id')
                 ->where('attendance.member_id', $members->id)
-                ->where('events.start_date', '>=', \Carbon\Carbon::now())
+                ->where('events.start_date', '>=', Carbon::now())
                 ->whereNull('attendance.confirmed_by_parent')
                 ->orderBy('events.start_date', 'ASC')
                 ->select('attendance.*')
@@ -159,7 +161,7 @@ class ParentDashboardController extends Controller
             $upcomingeventcount = 0;
             if ($upcomingevents->first()) {
                 foreach ($upcomingevents as $e) {
-                    if (!\Carbon\Carbon::parse($e->start)->isPast()) {
+                    if (!Carbon::parse($e->start)->isPast()) {
                         $upcomingeventcount++;
                     }
                 }
@@ -212,7 +214,7 @@ class ParentDashboardController extends Controller
             $upcomingeventcount = 0;
             if ($upcomingevents->first()) {
                 foreach ($upcomingevents as $e) {
-                    if (!\Carbon\Carbon::parse($e->start)->isPast()) {
+                    if (!Carbon::parse($e->start)->isPast()) {
                         $upcomingeventcount++;
                     }
                 }
@@ -236,8 +238,8 @@ class ParentDashboardController extends Controller
                 return [
                     'id' => $event->id,
                     'title' => $event->title,
-                    'start' => \Carbon\Carbon::parse($event->start)->toIso8601String(),
-                    'end' => \Carbon\Carbon::parse($event->end)->toIso8601String(),
+                    'start' => Carbon::parse($event->start)->toIso8601String(),
+                    'end' => Carbon::parse($event->end)->toIso8601String(),
                     'description' => $event->description ?? null,
                 ];
             });

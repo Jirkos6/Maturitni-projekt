@@ -19,6 +19,7 @@
     @use('App\Models\Teams')
     @use('App\Models\Events')
     @use('\Carbon\Carbon')
+
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             <div class="d-flex">
@@ -38,31 +39,36 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    @php
+        $teams = Teams::withCount('members')->get();
+        $totalTeams = $teams->count();
+        $totalMembers = $teams->sum('members_count');
+        $upcomingEventsCount = Events::where('start_date', '>', Carbon::now())->count();
+    @endphp
+
     <div class="card mb-4">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h4 class="mb-0"><i class="ri-dashboard-line me-2 text-primary"></i>Přehled družin</h4>
-                    <p class="text-muted mb-0">Správa a přehled všech družin</p>
-                </div>
-                <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
-                        <i class="ri-add-line me-1"></i> Přidat družinu
-                    </button>
-                </div>
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h4 class="mb-0"><i class="ri-dashboard-line me-2 text-primary"></i>Přehled družin</h4>
+                <p class="text-muted mb-0">Správa a přehled všech družin</p>
             </div>
+            <button type="button" class="btn btn-primary mt-3 mt-md-0" data-bs-toggle="modal" data-bs-target="#basicModal">
+                <i class="ri-add-line me-1"></i> Přidat družinu
+            </button>
         </div>
     </div>
-    <div class="row mb-4">
+
+    <div class="row g-4">
         <div class="col-md-4">
-            <div class="card  border-0 h-100">
+            <div class="card border-0 h-100">
                 <div class="card-body d-flex align-items-center">
                     <div class="rounded-circle bg-warning p-3 bg-opacity-10 me-3">
                         <i class="ri-team-line text-warning fs-4"></i>
                     </div>
                     <div>
                         <h6 class="card-subtitle mb-1 text-muted">Celkem družin</h6>
-                        <h4 class="card-title mb-0">{{ Teams::count() }}</h4>
+                        <h4 class="card-title mb-0">{{ $totalTeams }}</h4>
                     </div>
                 </div>
             </div>
@@ -75,8 +81,7 @@
                     </div>
                     <div>
                         <h6 class="card-subtitle mb-1 text-muted">Celkem členů</h6>
-                        <h4 class="card-title mb-0">{{ $data->sum(function ($team) {return $team->members->count();}) }}
-                        </h4>
+                        <h4 class="card-title mb-0">{{ $totalMembers }}</h4>
                     </div>
                 </div>
             </div>
@@ -89,49 +94,34 @@
                     </div>
                     <div>
                         <h6 class="card-subtitle mb-1 text-muted">Nadcházející akce</h6>
-                        <h4 class="card-title mb-0">
-                            @php
-                                $events = Events::All();
-                            @endphp
-                            {{ $events->filter(function ($event) {
-                                    return Carbon::parse($event->start_date)->isFuture();
-                                })->count() }}
-                        </h4>
+                        <h4 class="card-title mb-0">{{ $upcomingEventsCount }}</h4>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-transparent py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="ri-team-line me-2 text-primary"></i>Seznam družin
-                    <span class="badge bg-primary ms-2">{{ Teams::count() }}</span>
-                </h5>
-            </div>
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="ri-team-line me-2 text-primary"></i>Seznam družin
+                <span class="badge bg-primary ms-2">{{ $totalTeams }}</span>
+            </h5>
         </div>
 
         <div class="card-body">
-            @if (Teams::exists())
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4">
-                    @foreach ($data as $team)
+            @if ($totalTeams > 0)
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach ($teams as $team)
                         <div class="col">
                             <div class="card h-100 border shadow-sm hover-shadow">
-                                <div class="position-relative">
-                                    <img class="card-img-top"
-                                        style="height: 140px; object-fit: contain; padding: 1rem; background-color: #f8f9fa;"
-                                        src="{{ asset('https://assets.grok.com/users/1d9ba289-0702-422d-9d57-92fd56372e21/pwomf3DuY0qK9ndW-generated_image.jpg') }}"
-                                        alt="{{ $team->name }}" />
-                                    <div class="position-absolute top-0 end-0 p-2">
-                                        <span class="badge bg-primary rounded-pill">
-                                            <i class="ri-user-line me-1"></i>{{ $team->members->count() }}
-                                        </span>
-                                    </div>
-                                </div>
+                                <img class="card-img-top p-3 bg-light" style="height: 140px; object-fit: contain;"
+                                    src="{{ asset('storage/skaut.jpg') }}" alt="{{ $team->name }}" />
                                 <div class="card-body text-center">
                                     <h5 class="card-title mb-3">{{ $team->name }}</h5>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="ri-user-line me-1"></i>{{ $team->members_count }}
+                                    </span>
                                 </div>
                                 <div class="card-footer bg-white border-0 pb-3 text-center">
                                     <div class="d-flex justify-content-center gap-2">
@@ -154,9 +144,6 @@
                 </div>
             @else
                 <div class="text-center py-5">
-                    <div class="mb-4">
-                        <i class="ri-team-line text-primary" style="font-size: 4rem;"></i>
-                    </div>
                     <h3 class="text-primary mb-3">Ještě nebyly vytvořeny žádné družiny!</h3>
                     <p class="text-muted mb-4">Přidejte první družinu pomocí tlačítka níže.</p>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
@@ -166,6 +153,7 @@
             @endif
         </div>
     </div>
+
     <form method="POST" enctype="multipart/form-data" action="/teams">
         @csrf
         <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
