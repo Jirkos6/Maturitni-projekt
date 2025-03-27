@@ -74,7 +74,7 @@ class EventController extends Controller
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
+                'description' => 'nullable|string|max:255',
                 'start_datetime' => 'required|date_format:Y-m-d H:i',
                 'end_datetime' => 'required|date_format:Y-m-d H:i|after_or_equal:start_datetime',
                 'team_id' => 'nullable|exists:teams,id',
@@ -84,193 +84,174 @@ class EventController extends Controller
                 'recurrenceInterval' => 'nullable|integer|min:1',
                 'recurrenceEndDate' => 'nullable|date_format:Y-m-d|after:start_datetime',
                 'recurrenceRepeatCount' => 'nullable|integer|min:1|max:50',
-                'filterOutHolidayDates' => 'nullable',
                 'sendMailCheckbox' => 'nullable',
+            ], [], [
+                'title' => 'název akce',
+                'description' => 'popis',
+                'start_datetime' => 'začátek akce',
+                'end_datetime' => 'konec akce',
+                'team_id' => 'družina',
+                'team_ids' => 'družiny',
+                'team_ids.*' => 'vybraná družina',
+                'recurrence' => 'opakování',
+                'recurrenceInterval' => 'interval opakování',
+                'recurrenceEndDate' => 'datum konce opakování',
+                'recurrenceRepeatCount' => 'počet opakování',
+                'sendMailCheckbox' => 'odeslat email'
             ]);
 
-
             if (!isset($validated['team_id']) && !isset($validated['team_ids'])) {
-                throw new \Exception('Musíte vybrat alespoň jednu družinu (team_id) nebo více družin (team_ids).');
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Musíte vybrat alespoň jednu družinu.');
             }
-
-            if (isset($validated['team_id']) && isset($validated['team_ids'])) {
-                throw new \Exception('Nelze zadat team_id a team_ids současně.');
-            }
-
             $teamIds = $validated['team_ids'] ?? [$validated['team_id']];
             $teams = Teams::whereIn('id', $teamIds)->with('members')->get();
 
             if ($teams->isEmpty()) {
-                throw new \Exception('Vybrané družiny neexistují.');
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Vybrané družiny neexistují.');
             }
 
             if (isset($validated['team_ids']) && $teams->count() < 2) {
-                throw new \Exception('Pro více družin musíte vybrat alespoň 2 družiny.');
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Pro více družin musíte vybrat alespoň 2 družiny.');
             }
-
-            $sendMail = $validated['sendMailCheckbox'] ?? null;
-            $recurrenceType = $validated['recurrence'] ?? null;
-            $interval = (int) ($validated['recurrenceInterval'] ?? 1);
-            $endDate = $validated['recurrenceEndDate'] ?? null;
-            $repeatCount = (int) ($validated['recurrenceRepeatCount'] ?? 0);
-            $filterOutHolidays = isset($validated['filterOutHolidayDates']) && $validated['filterOutHolidayDates'] === 'on';
-
             $startDateTime = Carbon::createFromFormat('Y-m-d H:i', $validated['start_datetime']);
             $endDateTime = Carbon::createFromFormat('Y-m-d H:i', $validated['end_datetime']);
             $duration = $startDateTime->diffInSeconds($endDateTime);
-            $emailCount = 0;
-            $recurringEndDate = $endDate ? Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay() : null;
-            $estimatedEventCount = 1;
-            if ($recurrenceType && ($repeatCount > 0 || $recurringEndDate)) {
-                if ($repeatCount > 0) {
-                    $estimatedEventCount = $repeatCount;
-                } else if ($recurringEndDate) {
-                    $diffInDays = $startDateTime->diffInDays($recurringEndDate);
-
-                    switch ($recurrenceType) {
-                        case 'daily':
-                            $estimatedEventCount = ceil($diffInDays / $interval) + 1;
-                            break;
-                        case 'weekly':
-                            $estimatedEventCount = ceil($diffInDays / (7 * $interval)) + 1;
-                            break;
-                        case 'monthly':
-                            $estimatedEventCount = ceil($startDateTime->diffInMonths($recurringEndDate) / $interval) + 1;
-                            break;
-                    }
-                }
-            }
-
-            if ($estimatedEventCount > 50) {
-                throw new \Exception('Počet opakovaných akcí nesmí překročit 50. Odhadovaný počet: ' . $estimatedEventCount);
-            }
-            if (!$recurrenceType || !($repeatCount > 0 || $recurringEndDate)) {
-                $eventDates = [$startDateTime];
-            } else {
-                $eventDates = $this->generateRecurringDates(
-                    $startDateTime,
-                    $recurrenceType,
-                    $interval,
-                    $recurringEndDate,
-                    $repeatCount
-                );
-            }
-
-            if (empty($eventDates)) {
-                throw new \Exception('Nepodařilo se vygenerovat žádné datum události. Všechny termíny kolidují se svátky.');
-            }
-
+            $eventDates = $this->calculateEventDates(
+                $startDateTime,
+                $validated['recurrence'] ?? null,
+                (int) ($validated['recurrenceInterval'] ?? 1),
+                $validated['recurrenceEndDate'] ?? null,
+                (int) ($validated['recurrenceRepeatCount'] ?? 0)
+            );
             if (count($eventDates) > 50) {
-                throw new \Exception('Počet opakovaných akcí nesmí překročit 50. Aktuální počet: ' . count($eventDates));
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Počet opakovaných akcí nesmí překročit 50. Aktuální počet: ' . count($eventDates));
             }
-
+            $createdEvents = [];
             $uniqueMembers = $teams->pluck('members')->flatten()->unique('id');
 
-            $createdEvents = [];
-
             foreach ($eventDates as $eventDate) {
-                $event = new Events();
-                $event->title = $validated['title'];
-                $event->description = $validated['description'] ?? null;
-                $event->start_date = $eventDate;
-                $event->end_date = $eventDate->copy()->addSeconds($duration);
-                $event->save();
+                $event = Events::create([
+                    'title' => $validated['title'],
+                    'description' => $validated['description'] ?? null,
+                    'start_date' => $eventDate,
+                    'end_date' => $eventDate->copy()->addSeconds($duration)
+                ]);
+
                 $createdEvents[] = $event->id;
-
                 $event->teams()->attach($teamIds);
-
-                foreach ($teams as $team) {
-                    $members = $team->members;
-                    foreach ($members as $member) {
-                        Attendance::create([
-                            'event_id' => $event->id,
-                            'member_id' => $member->id,
-                            'status' => 'present',
-                            'confirmed_by_parent' => null,
-                        ]);
-                    }
-                }
-            }
-            if ($sendMail && !empty($createdEvents)) {
-                $firstEvent = Events::find($createdEvents[0]);
+                $attendanceRecords = [];
                 foreach ($uniqueMembers as $member) {
-                    if ($member->mother_email) {
-                        Mail::to($member->mother_email)->send(new EventEmail(
-                            $firstEvent->title,
-                            $firstEvent->description,
-                            $firstEvent->start_date,
-                            $firstEvent->end_date
-                        ));
-                        $emailCount++;
-                    }
-
-                    if ($member->father_email) {
-                        Mail::to($member->father_email)->send(new EventEmail(
-                            $firstEvent->title,
-                            $firstEvent->description,
-                            $firstEvent->start_date,
-                            $firstEvent->end_date
-                        ));
-                        $emailCount++;
-                    }
+                    $attendanceRecords[] = [
+                        'event_id' => $event->id,
+                        'member_id' => $member->id,
+                        'status' => 'present',
+                        'confirmed_by_parent' => null
+                    ];
                 }
+                Attendance::insert($attendanceRecords);
+            }
+            $emailCount = 0;
+            if (!empty($createdEvents) && ($validated['sendMailCheckbox'] ?? false)) {
+                $emailCount = $this->sendEventEmails($uniqueMembers, Events::find($createdEvents[0]));
+            }
+            $successMessage = "Událost '{$validated['title']}' byla úspěšně přidána! (Vytvořeno " . count($createdEvents) . " událostí)";
+            if ($emailCount > 0) {
+                $successMessage .= " Bylo zasláno {$emailCount} mailů!";
             }
 
-
-            $request->session()->flash('success', "" . $sendMail ? "Událost '{$validated['title']}' byla úspěšně přidána! (Vytvořeno " . count($createdEvents) . " událostí). Bylo zasláno {$emailCount} mailů!" : "Událost '{$validated['title']}' byla úspěšně přidána! (Vytvořeno " . count($createdEvents) . " událostí)");
-            return redirect()->back();
+            return redirect()->back()->with('success', $successMessage);
         } catch (\Exception $e) {
-            $request->session()->flash('error', "Nastala chyba při přidávání události! " . $e->getMessage());
-            return redirect()->back()->withInput();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         }
     }
-    private function generateRecurringDates($startDate, $recurrenceType, $interval, $endDate, $repeatCount)
+
+    private function calculateEventDates($startDateTime, $recurrenceType, $interval, $endDate, $repeatCount)
     {
-        if (!$recurrenceType || (!$endDate && !$repeatCount)) {
-            return [$startDate];
+        if (!$recurrenceType || !($repeatCount > 0 || $endDate)) {
+            return [$startDateTime];
         }
 
-        $interval = max(1, intval($interval));
-        $dates = [];
-        $currentDate = Carbon::parse($startDate);
-        $endDateTime = $endDate ? Carbon::parse($endDate) : null;
-        $count = 0;
-        $maxEvents = $repeatCount ? min(50, $repeatCount) : ($endDateTime ? 50 : 1);
+        $recurringEndDate = $endDate ? Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay() : null;
+        $dates = [$startDateTime];
+        $currentDate = $startDateTime->copy();
 
-        while ($count < $maxEvents) {
-            if ($count > 0) {
-                switch ($recurrenceType) {
-                    case 'daily':
-                        $currentDate->addDays($interval);
-                        break;
-                    case 'weekly':
-                        $currentDate->addWeeks($interval);
-                        break;
-                    case 'monthly':
-                        $currentDate->addMonths($interval);
-                        break;
-                    default:
-                        break;
-                }
+        while (count($dates) < $repeatCount || ($recurringEndDate && $currentDate->lt($recurringEndDate))) {
+            switch ($recurrenceType) {
+                case 'daily':
+                    $currentDate = $currentDate->addDays($interval);
+                    break;
+                case 'weekly':
+                    $currentDate = $currentDate->addWeeks($interval);
+                    break;
+                case 'monthly':
+                    $currentDate = $currentDate->addMonths($interval);
+                    break;
             }
-            if ($endDateTime && $currentDate->greaterThan($endDateTime)) {
+
+            if ($recurringEndDate && $currentDate->gt($recurringEndDate)) {
                 break;
             }
+
+            if ($repeatCount && count($dates) >= $repeatCount) {
+                break;
+            }
+
             $dates[] = $currentDate->copy();
-            $count++;
-            if ($repeatCount && $count >= $repeatCount) {
-                break;
-            }
         }
 
         return $dates;
     }
+    private function sendEventEmails($members, $event)
+    {
+        $emailCount = 0;
+        foreach ($members as $member) {
+            if ($member->mother_email) {
+                try {
+                    Mail::to($member->mother_email)->send(new EventEmail(
+                        $event->title,
+                        $event->description,
+                        $event->start_date,
+                        $event->end_date
+                    ));
+                    $emailCount++;
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+
+            if ($member->father_email) {
+                try {
+                    Mail::to($member->father_email)->send(new EventEmail(
+                        $event->title,
+                        $event->description,
+                        $event->start_date,
+                        $event->end_date
+                    ));
+                    $emailCount++;
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+        }
+        return $emailCount;
+    }
+
     public function updateMultipleEvents(Request $request)
     {
         try {
             $validated = $request->validate([
                 'title' => 'nullable|string|max:255',
-                'description' => 'nullable|string',
+                'description' => 'nullable|string|max:255',
                 'start_date' => 'nullable|date_format:Y-m-d',
                 'end_date' => 'nullable|date_format:Y-m-d',
                 'start_time' => 'nullable|date_format:H:i',
@@ -280,6 +261,18 @@ class EventController extends Controller
                 'team_ids.*' => 'nullable|exists:teams,id',
                 'event_ids' => 'required|array',
                 'event_ids.*' => 'exists:events,id'
+            ], [], [
+                'title' => 'název akce',
+                'description' => 'popis',
+                'start_date' => 'datum začátku',
+                'end_date' => 'datum konce',
+                'start_time' => 'čas začátku',
+                'end_time' => 'čas konce',
+                'team_id' => 'družina',
+                'team_ids' => 'družiny',
+                'team_ids.*' => 'vybraná družina',
+                'event_ids' => 'vybrané akce',
+                'event_ids.*' => 'vybraná akce'
             ]);
 
             $title = $validated['title'] ?? null;
@@ -338,13 +331,14 @@ class EventController extends Controller
             } else {
                 return redirect()->back()->with('error', 'Nejsou žadná data pro editaci!');
             }
-        } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Nastala chyba při editaci: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         }
     }
     public function deleteMultipleEvents(Request $request)
     {
-      error_log($request);
       try {
       $validated = $request->validate([
       'event_ids' => 'required|array',
@@ -376,31 +370,41 @@ class EventController extends Controller
 
     public function updateEvent(Request $request, $id)
     {
-      try {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'end_time' => 'required|date_format:H:i',
-        ]);
-        $startDatetime = Carbon::parse("{$validated['start_date']} {$validated['start_time']}");
-        $endDatetime = Carbon::parse("{$validated['end_date']} {$validated['end_time']}");
-        if ($endDatetime->lessThanOrEqualTo($startDatetime)) {
-            return redirect()->back()->with('error','Konec akce musí být po začátku akce.')->withInput()->withFragment('#navs-pills-events');
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string|max:255',
+                'start_date' => 'required|date',
+                'start_time' => 'required|date_format:H:i',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'end_time' => 'required|date_format:H:i',
+            ], [], [
+                'title' => 'název akce',
+                'description' => 'popis',
+                'start_date' => 'datum začátku',
+                'end_date' => 'datum konce',
+                'start_time' => 'čas začátku',
+                'end_time' => 'čas konce'
+            ]);
+
+            $startDatetime = Carbon::parse("{$validated['start_date']} {$validated['start_time']}");
+            $endDatetime = Carbon::parse("{$validated['end_date']} {$validated['end_time']}");
+            if ($endDatetime->lessThanOrEqualTo($startDatetime)) {
+                return redirect()->back()->with('error','Konec akce musí být po začátku akce.')->withInput()->withFragment('#navs-pills-events');
+            }
+            $event = Events::findOrFail($id);
+            $event->updateOrFail([
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'start_date' => $startDatetime,
+                'end_date' => $endDatetime,
+            ]);
+            return redirect()->back()->with('success', 'Akce byla úspěšně aktualizována.')->withFragment('#navs-pills-events');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage())
+                ->withFragment('#navs-pills-events');
         }
-        $event = Events::findOrFail($id);
-        $event->updateOrFail([
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'start_date' => $startDatetime,
-            'end_date' => $endDatetime,
-        ]);
-        return redirect()->back()->with('success', 'Akce byla úspěšně aktualizována.')->withFragment('#navs-pills-events');
-      } catch (Exception $e)
-      {
-        return redirect()->back()->with('error', 'Nastala chyba při editaci ' . $e)->withFragment('#navs-pills-events');
-      }
     }
 }

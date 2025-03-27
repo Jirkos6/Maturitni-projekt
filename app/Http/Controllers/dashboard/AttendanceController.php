@@ -10,27 +10,35 @@ class AttendanceController extends Controller
 {
     public function updateAttendance(Request $request)
     {
-        $validated = $request->validate([
-            'member_id' => 'required|exists:members,id',
-            'event_id' => 'required|exists:events,id',
-            'status' => 'required|in:present,excused,unexcused',
-        ]);
-
-        $attendance = Attendance::where('member_id', $validated['member_id'])
-            ->where('event_id', $validated['event_id'])
-            ->first();
-
-        if ($attendance) {
-            $attendance->status = $validated['status'];
-            $attendance->save();
-        } else {
-            Attendance::create([
-                'member_id' => $validated['member_id'],
-                'event_id' => $validated['event_id'],
-                'status' => $validated['status'],
+        try {
+            $validated = $request->validate([
+                'member_id' => 'required|exists:members,id',
+                'event_id' => 'required|exists:events,id',
+                'status' => 'required|in:present,excused,unexcused',
+            ], [], [
+                'member_id' => 'člen',
+                'event_id' => 'akce',
+                'status' => 'stav účasti'
             ]);
-        }
 
-        return response()->json(['success' => true]);
+            $attendance = Attendance::where('member_id', $validated['member_id'])
+                ->where('event_id', $validated['event_id'])
+                ->first();
+
+            if ($attendance) {
+                $attendance->status = $validated['status'];
+                $attendance->save();
+            } else {
+                Attendance::create([
+                    'member_id' => $validated['member_id'],
+                    'event_id' => $validated['event_id'],
+                    'status' => $validated['status'],
+                ]);
+            }
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 422);
+        }
     }
 }

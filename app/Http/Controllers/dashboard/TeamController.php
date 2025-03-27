@@ -28,17 +28,19 @@ class TeamController extends Controller
     public function storeTeam(Request $request)
     {
         try {
-            $request->validate([
+            $validated = $request->validate([
                 'name' => 'required|string|max:255'
+            ], [], [
+                'name' => 'název družiny'
             ]);
+            
             $team = new Teams;
-            $team->name = $request->input('name');
+            $team->name = $validated['name'];
             $team->save();
-            $request->session()->flash('success', "Tým $team->name byl úspěšně přidán!");
-            return redirect('/');
+            
+            return redirect('/')->with('success', "Družina {$team->name} byla úspěšně přidána!");
         } catch (\Exception $e) {
-            $request->session()->flash('error', "Nastala chyba při přidávání týmu! " . $e->getMessage());
-            return redirect('/');
+            return redirect('/')->with('error', "Nastala chyba při přidávání družiny: " . $e->getMessage());
         }
     }
 

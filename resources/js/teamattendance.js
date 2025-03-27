@@ -503,12 +503,14 @@ function populateEditEventModal(event) {
   document.getElementById('editEventId').value = event.id;
   document.getElementById('editTitle').value = event.title || '';
   document.getElementById('editDescription').value = event.description || '';
-  const start = new Date(event.start);
-  const end = new Date(event.end);
-  document.getElementById('editStartDate').value = start.toISOString().split('T')[0];
-  document.getElementById('editStartTime').value = start.toTimeString().slice(0, 5);
-  document.getElementById('editEndDate').value = end.toISOString().split('T')[0];
-  document.getElementById('editEndTime').value = end.toTimeString().slice(0, 5);
+  const startDate = event.start_date.split(' ')[0];
+  const startTime = event.start_date.split(' ')[1].substring(0, 5);
+  document.getElementById('editStartDate').value = startDate;
+  document.getElementById('editStartTime').value = startTime;
+  const endDate = event.end_date.split(' ')[0];
+  const endTime = event.end_date.split(' ')[1].substring(0, 5);
+  document.getElementById('editEndDate').value = endDate;
+  document.getElementById('editEndTime').value = endTime;
 }
 function filterAttendance(filter, event) {
   if (event) event.preventDefault();
@@ -680,7 +682,7 @@ function updateAttendance(selectElement) {
       status: status
     },
     headers: {
-      'X-CSRF-Token': $('meta[name="_token"]').attr('content')
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     },
     success: function (response) {
       if (response.success) {

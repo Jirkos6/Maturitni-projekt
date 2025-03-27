@@ -84,8 +84,19 @@
                                         <i class="ri-calendar-check-line text-primary"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Datum</small>
+                                        <small class="text-muted d-block">Začátek</small>
                                         <strong>{{ Carbon::parse($data->start_date)->format('d.m.Y') }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-primary-subtle p-2 me-3">
+                                        <i class="ri-calendar-check-line text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Konec</small>
+                                        <strong>{{ Carbon::parse($data->end_date)->format('d.m.Y') }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -95,9 +106,19 @@
                                         <i class="ri-time-line text-primary"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Čas</small>
-                                        <strong>{{ Carbon::parse($data->start_date)->format('H:i') }} -
-                                            {{ Carbon::parse($data->end_date)->format('H:i') }}</strong>
+                                        <small class="text-muted d-block">Čas začátku</small>
+                                        <strong>{{ Carbon::parse($data->start_date)->format('H:i') }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-primary-subtle p-2 me-3">
+                                        <i class="ri-time-line text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Čas konce</small>
+                                        <strong>{{ Carbon::parse($data->end_date)->format('H:i') }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -140,8 +161,8 @@
                                             <i class="ri-time-line text-info"></i>
                                         </div>
                                         <div>
-                                            <small class="text-muted d-block">Začíná za</small>
-                                            <strong>{{ $now->diffForHumans($start, ['parts' => 2]) }}</strong>
+                                            <small class="text-muted d-block">Začátek</small>
+                                            <strong>{{ $start->diffForHumans($now, ['parts' => 2]) }}</strong>
                                         </div>
                                     @elseif ($now->gt($end))
                                         <div class="rounded-circle bg-primary-subtle p-2 me-3">
@@ -149,7 +170,7 @@
                                         </div>
                                         <div>
                                             <small class="text-muted d-block">Ukončeno</small>
-                                            <strong>{{ $end->diffForHumans() }}</strong>
+                                            <strong>{{ $end->diffForHumans($now, ['parts' => 2]) }}</strong>
                                         </div>
                                     @else
                                         <div class="rounded-circle bg-primary-subtle p-2 me-3">
@@ -157,7 +178,7 @@
                                         </div>
                                         <div>
                                             <small class="text-muted d-block">Právě probíhá</small>
-                                            <strong>Do konce zbývá {{ $now->diffForHumans($end, ['parts' => 2]) }}</strong>
+                                            <strong>Do konce zbývá {{ $end->diff($now)->format('%d dní, %h hodin, %i minut') }}</strong>
                                         </div>
                                     @endif
                                 </div>

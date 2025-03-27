@@ -22,7 +22,6 @@ class UserController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'surname' => 'required|string|max:255',
-                'member_id' => 'nullable|exists:members,id',
                 'email' => 'required|email|max:255',
             ]);
             $user = new User;

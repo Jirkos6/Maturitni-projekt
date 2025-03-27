@@ -280,8 +280,8 @@
                                                             <a class="dropdown-item" href="/events/{{ $event->id }}">
                                                                 <i class="ri-information-line me-2"></i> Zobrazit
                                                             </a>
-                                                            <a class="dropdown-item" href="#"
-                                                                onclick="editEvent({{ $event->id }})">
+                                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editEventModal"
+                                                                onclick="populateEditEventModal({{ json_encode($event) }})">
                                                                 <i class="ri-pencil-line me-2"></i> Upravit
                                                             </a>
                                                             <div class="dropdown-divider"></div>
@@ -328,8 +328,8 @@
                                                             <a class="dropdown-item" href="/events/{{ $event->id }}">
                                                                 <i class="ri-information-line me-2"></i> Zobrazit
                                                             </a>
-                                                            <a class="dropdown-item" href="#"
-                                                                onclick="editEvent({{ $event->id }})">
+                                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editEventModal"
+                                                                onclick="populateEditEventModal({{ json_encode($event) }})">
                                                                 <i class="ri-pencil-line me-2"></i> Upravit
                                                             </a>
                                                             <div class="dropdown-divider"></div>
@@ -1250,4 +1250,116 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white">
+                <h5 class="modal-title" id="editEventModalLabel">
+                    <i class="ri-edit-2-line me-2"></i>Upravit akci
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Zavřít"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editEventForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="editEventId" name="event_id">
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-transparent">
+                            <h6 class="mb-0">
+                                <i class="ri-information-line me-2 text-primary"></i>Základní informace
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="editTitle" class="form-label">Název akce <span
+                                        class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i
+                                            class="ri-calendar-event-line"></i></span>
+                                    <input type="text" class="form-control" id="editTitle"
+                                        name="title" required placeholder="Zadejte název akce">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editDescription" class="form-label">Popis</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i
+                                            class="ri-file-text-line"></i></span>
+                                    <textarea class="form-control" id="editDescription" name="description" rows="3"
+                                        placeholder="Zadejte popis akce"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header bg-transparent">
+                            <h6 class="mb-0">
+                                <i class="ri-time-line me-2 text-primary"></i>Datum a čas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="editStartDate" class="form-label">Začátek (datum) <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i
+                                                class="ri-calendar-line"></i></span>
+                                        <input type="date" class="form-control" id="editStartDate"
+                                            name="start_date" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editStartTime" class="form-label">Začátek (čas) <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i
+                                                class="ri-time-line"></i></span>
+                                        <input type="time" class="form-control" id="editStartTime"
+                                            name="start_time" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="editEndDate" class="form-label">Konec (datum) <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i
+                                                class="ri-calendar-line"></i></span>
+                                        <input type="date" class="form-control" id="editEndDate"
+                                            name="end_date" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editEndTime" class="form-label">Konec (čas) <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i
+                                                class="ri-time-line"></i></span>
+                                        <input type="time" class="form-control" id="editEndTime"
+                                            name="end_time" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            <i class="ri-close-line me-1"></i>Zavřít
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-1"></i>Uložit změny
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

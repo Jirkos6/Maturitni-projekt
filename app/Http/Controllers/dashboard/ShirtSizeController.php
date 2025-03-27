@@ -16,14 +16,20 @@ class ShirtSizeController extends Controller
   public function storeShirtSize(Request $request)
   {
     try {
-    $shirtSizes = new ShirtSizes();
-    $shirtSizes->size = $request->input('size');
-    $shirtSizes->save();
-    return redirect()->back()->with('success', "Přidání proběhlo úspěšně!");
-  } catch (Exception $e)
-  {
-    return redirect()->back()->with('error', "Nastala chyba při přidávání!" . $e);
-  }
+      $validated = $request->validate([
+        'size' => 'required|string|max:255'
+      ], [], [
+        'size' => 'velikost trička'
+      ]);
+
+      $shirtSizes = new ShirtSizes();
+      $shirtSizes->size = $validated['size'];
+      $shirtSizes->save();
+      
+      return redirect()->back()->with('success', "Velikost trička byla úspěšně přidána!");
+    } catch (\Exception $e) {
+      return redirect()->back()->with('error', "Nastala chyba při přidávání velikosti trička: " . $e->getMessage());
+    }
   }
   public function deleteShirtSize($id)
   {

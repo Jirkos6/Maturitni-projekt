@@ -62,7 +62,7 @@
 
             calendar = new window.Calendar(calendarEl, {
                 plugins: [window.interaction, window.dayGridPlugin, window.timeGridPlugin, window
-                    .listPlugin, window.multiMonthPlugin, window.rrulePlugin
+                    .listPlugin, window.multiMonthPlugin
                 ],
                 selectable: 'true',
                 initialView: 'dayGridMonth',
@@ -154,6 +154,7 @@
                 });
             }
         });
+
     </script>
     <div class="row gy-6 h-100">
         @if (\Session::has('success'))
@@ -1642,9 +1643,9 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="{{ route('member.store') }}" method="POST" id="createMemberForm">
+                                <form action="{{ route('member.store') }}" method="POST">
                                     @csrf
-                                    @method('POST')
+                                    <input type="hidden" name="team_id" value="{{ $id1 }}">
                                     <div class="card mb-4">
                                         <div class="card-header bg-transparent">
                                             <h6 class="mb-0">
@@ -1846,9 +1847,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <input type="text" value="{{ $teamId }}" id="team_id"
-                                        name="team_id" hidden>
 
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-outline-secondary"

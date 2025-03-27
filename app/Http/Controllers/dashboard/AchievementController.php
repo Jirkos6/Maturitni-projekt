@@ -16,8 +16,8 @@ class AchievementController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'image' => 'nullable|image|max:2048',
+                'description' => 'nullable|string|max:255',
+                'image' => 'nullable|image|max:10000',
             ]);
 
             $achievement = new Achievements();
@@ -40,7 +40,7 @@ class AchievementController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
+                'description' => 'nullable|string|max:255',
                 'image' => 'nullable|image|max:2048',
             ]);
 
