@@ -131,7 +131,7 @@
                                         <i class="ri-team-line text-primary"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Týmy</small>
+                                        <small class="text-muted d-block">Družiny</small>
                                         <div class="mt-1">
                                             @foreach ($data->teams as $team)
                                                 <a href="/teams/{{ $team->id }}"
