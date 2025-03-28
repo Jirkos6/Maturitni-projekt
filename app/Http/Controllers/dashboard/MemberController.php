@@ -17,7 +17,6 @@ class MemberController extends Controller
     public function storeMember(Request $request)
     {
         try {
-            error_log($request);
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'surname' => 'nullable|string|max:255',
@@ -140,9 +139,12 @@ class MemberController extends Controller
             ->leftJoin('member_achievement', 'members.id', '=', 'member_achievement.member_id')
             ->whereNull('members.deleted_at')
             ->whereNull('shirt_sizes.deleted_at')
-            ->whereNull('member_achievement.deleted_at')
             ->select('members.*', 'shirt_sizes.*', 'members.id as members_id')
             ->first();
+
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json($data);
+        }
 
         $achievements = Members::rightJoin('member_achievement', 'members.id', '=', 'member_achievement.member_id')
             ->rightJoin('achievements', 'member_achievement.achievement_id', '=', 'achievements.id')
@@ -179,9 +181,9 @@ class MemberController extends Controller
             ]);
             $member = Members::findOrFail($id);
             $member->update($validated);
-            return redirect()->back()->with('success', 'Člen byl úspěšně upraven!');
+            return redirect()->back()->with('success', 'Člen byl úspěšně upraven!')->withFragment('#navs-pills-top-messages');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', "Nastala chyba při editaci!" . $e->getMessage());
+            return redirect()->back()->with('error', "Nastala chyba při editaci!" . $e->getMessage())->withFragment('#navs-pills-top-messages');
         }
     }
 
@@ -196,5 +198,14 @@ class MemberController extends Controller
         } else {
             return redirect()->back()->with('error', 'Položka neexistuje!')->withFragment('#navs-pills-top-messages');
         }
+    }
+
+    public function getMemberData($id)
+    {
+        $member = Members::find($id);
+        if (!$member) {
+            return response()->json(['error' => 'Člen nenalezen'], 404);
+        }
+        return response()->json($member);
     }
 }

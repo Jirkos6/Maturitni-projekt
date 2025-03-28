@@ -27,6 +27,7 @@ Route::middleware([
     Route::get('/events/{id}', [EventController::class, 'showEvent'])->name('dashboard-events');
     Route::delete('/event/{id}', [EventController::class, 'deleteEvent'])->name('events.delete');
     Route::get('/members/{member_id}', [MemberController::class, 'showMember'])->name('member.team.show');
+    Route::get('/member-data/{id}', [MemberController::class, 'getMemberData'])->name('member.data');
     Route::post('/members', [MemberController::class, 'storeMember'])->name('member.store');
     Route::post('/members-multiple', [MemberController::class, 'storeMultipleMembers'])->name('member.store.multiple');
     Route::put('/member-edit/{id}', [MemberController::class, 'updateMember'])->name('member.update');

@@ -1,9 +1,7 @@
 @php
     $container = 'container-xxl';
     $containerNav = 'container-xxl';
-    $team = $data->first();
-    $teamId = $team->id;
-    $sectionName = $team->name;
+    $sectionName = $data->name;
 @endphp
 @extends('layouts/contentNavbarLayout')
 
@@ -155,6 +153,44 @@
             }
         });
 
+        function openEditMemberModal(memberId) {
+            const form = document.getElementById('editMemberForm');
+            form.action = `/member-edit/${memberId}`;
+            
+            // Používáme správný endpoint pro data člena
+            fetch(`/member-data/${memberId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Nepodařilo se načíst data člena');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('edit_name').value = data.name || '';
+                    document.getElementById('edit_surname').value = data.surname || '';
+                    document.getElementById('edit_nickname').value = data.nickname || '';
+                    document.getElementById('edit_age').value = data.age || '';
+                    document.getElementById('edit_shirt_size_id').value = data.shirt_size_id || '';
+                    document.getElementById('edit_telephone').value = data.telephone || '';
+                    document.getElementById('edit_email').value = data.email || '';
+                    document.getElementById('edit_mother_name').value = data.mother_name || '';
+                    document.getElementById('edit_mother_surname').value = data.mother_surname || '';
+                    document.getElementById('edit_mother_telephone').value = data.mother_telephone || '';
+                    document.getElementById('edit_mother_email').value = data.mother_email || '';
+                    document.getElementById('edit_father_name').value = data.father_name || '';
+                    document.getElementById('edit_father_surname').value = data.father_surname || '';
+                    document.getElementById('edit_father_telephone').value = data.father_telephone || '';
+                    document.getElementById('edit_father_email').value = data.father_email || '';
+                })
+                .catch(error => {
+                    console.error('Chyba při načítání dat člena:', error);
+                    alert('Nastala chyba při načítání dat člena. Zkuste to prosím znovu.');
+                });
+        }
     </script>
     <div class="row gy-6 h-100">
         @if (\Session::has('success'))
@@ -173,7 +209,7 @@
         @endif
         <h3 class="mb-0 d-flex flex-wrap align-items-center gap-2">
             Družina
-            <span class="badge rounded-pill bg-label-primary fs-6">{{ $team->name }}</span>
+            <span class="badge rounded-pill bg-label-primary fs-6">{{ $data->name }}</span>
         </h3>
         <div class="nav-align-top mb-6 mt-6 h-100 d-flex flex-column">
             <ul class="nav nav-pills mb-4 flex-column flex-md-row gap-2" role="tablist">
@@ -381,7 +417,7 @@
                                             <th class="ps-4">Název</th>
                                             <th>Začátek</th>
                                             <th>Konec</th>
-                                            <th>Konání</th>
+                                            <th>Začátek</th>
                                             <th>Popis</th>
                                             <th class="text-end pe-4">Akce</th>
                                         </tr>
@@ -879,6 +915,13 @@
                                                                 </a>
                                                                 <a class="dropdown-item" href="#"
                                                                     data-bs-toggle="modal"
+                                                                    data-bs-target="#editExistingMemberModal"
+                                                                    data-member-id="{{ $item->id }}"
+                                                                    onclick="openEditMemberModal({{ $item->id }})">
+                                                                    <i class="ri-edit-line me-2"></i> Upravit
+                                                                </a>
+                                                                <a class="dropdown-item" href="#"
+                                                                    data-bs-toggle="modal"
                                                                     data-bs-target="#assignAchievementModal"
                                                                     data-member-id="{{ $item->id }}">
                                                                     <i class="ri-award-line me-2"></i> Přidělit odborky
@@ -955,6 +998,13 @@
                                                                     <i class="ri-settings-3-line me-1"></i> Akce
                                                                 </button>
                                                                 <div class="dropdown-menu dropdown-menu-end">
+                                                                    <a class="dropdown-item" href="#"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#editExistingMemberModal"
+                                                                        data-member-id="{{ $item->id }}"
+                                                                        onclick="openEditMemberModal({{ $item->id }})">
+                                                                        <i class="ri-edit-line me-2"></i> Upravit
+                                                                    </a>
                                                                     <a class="dropdown-item" href="#"
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#assignAchievementModal"
@@ -1976,8 +2026,7 @@
 
                                             <input type="hidden" id="startDatetime" name="start_datetime">
                                             <input type="hidden" id="endDatetime" name="end_datetime">
-                                            <input type="text" value="{{ $teamId }}" id="team_id"
-                                                name="team_id" hidden>
+                                            <input type="hidden" value="{{ $id1 }}" id="team_id" name="team_id">
                                         </div>
                                     </div>
                                     <div class="card mb-4">
@@ -2150,7 +2199,7 @@
                                             <tbody id="membersTableBody">
                                                 @for ($i = 0; $i < 1; $i++)
                                                     <tr>
-                                                        <input type="text" value="{{ $teamId }}"
+                                                        <input type="text" value="{{ $id1 }}"
                                                             id="team_id" name="team_id" hidden>
                                                         <td><input type="text"
                                                                 name="members[{{ $i }}][name]"
@@ -2346,8 +2395,7 @@
                                                     <label for="name" class="form-label">Jméno <span
                                                             class="text-danger">*</span></label>
                                                     <div class="input-group">
-                                                        <span class="input-group-text"><i
-                                                                class="ri-user-line"></i></span>
+                                                        <span class="input-group-text"><i class="ri-user-line"></i></span>
                                                         <input type="text" class="form-control" id="name"
                                                             name="name" required placeholder="Zadejte jméno">
                                                     </div>
@@ -2753,7 +2801,7 @@
                                                 </div>
                                             </div>
                                             <input type="hidden" id="editTeamId" name="team_id"
-                                                value="{{ $teamId }}">
+                                                value="{{ $id1 }}">
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -2772,3 +2820,225 @@
                 </div>
 
             @endsection
+
+            <!-- Modální okno pro editaci existujícího člena -->
+            <div class="modal fade" id="editExistingMemberModal" tabindex="-1" aria-labelledby="editExistingMemberModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header text-white">
+                            <h5 class="modal-title" id="editExistingMemberModalLabel">
+                                <i class="ri-user-edit-line me-2"></i>Upravit člena
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editMemberForm" action="" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="card mb-4">
+                                    <div class="card-header bg-transparent">
+                                        <h6 class="mb-0">
+                                            <i class="ri-user-line me-2 text-primary"></i>Osobní údaje
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="edit_name" class="form-label">Jméno <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="ri-user-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_name"
+                                                        name="name" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_surname" class="form-label">Příjmení <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="ri-user-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_surname"
+                                                        name="surname" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="edit_nickname" class="form-label">Přezdívka</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-user-smile-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_nickname"
+                                                        name="nickname">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_age" class="form-label">Věk</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-calendar-line"></i></span>
+                                                    <input type="number" class="form-control" id="edit_age"
+                                                        name="age" min="0" max="100">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="edit_shirt_size_id" class="form-label">Velikost trika</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-t-shirt-line"></i></span>
+                                                    <select class="form-select" id="edit_shirt_size_id"
+                                                        name="shirt_size_id">
+                                                        <option value="">Vyberte velikost</option>
+                                                        @foreach (App\Models\ShirtSizes::all() as $size)
+                                                            <option value="{{ $size->id }}">{{ $size->size }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header bg-transparent">
+                                        <h6 class="mb-0">
+                                            <i class="ri-contacts-line me-2 text-primary"></i>Kontaktní údaje
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="edit_telephone" class="form-label">Telefon</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-phone-line"></i></span>
+                                                    <input type="tel" class="form-control" id="edit_telephone"
+                                                        name="telephone">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_email" class="form-label">Email</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-mail-line"></i></span>
+                                                    <input type="email" class="form-control" id="edit_email"
+                                                        name="email">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header bg-transparent">
+                                        <h6 class="mb-0">
+                                            <i class="ri-parent-line me-2 text-primary"></i>Údaje o rodičích
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="mb-3 text-muted">Matka</h6>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="edit_mother_name" class="form-label">Jméno</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-user-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_mother_name"
+                                                        name="mother_name">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_mother_surname" class="form-label">Příjmení</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-user-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_mother_surname"
+                                                        name="mother_surname">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label for="edit_mother_telephone" class="form-label">Telefon</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-phone-line"></i></span>
+                                                    <input type="tel" class="form-control" id="edit_mother_telephone"
+                                                        name="mother_telephone">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_mother_email" class="form-label">Email</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-mail-line"></i></span>
+                                                    <input type="email" class="form-control" id="edit_mother_email"
+                                                        name="mother_email">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <h6 class="mb-3 text-muted">Otec</h6>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="edit_father_name" class="form-label">Jméno</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-user-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_father_name"
+                                                        name="father_name">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_father_surname" class="form-label">Příjmení</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-user-line"></i></span>
+                                                    <input type="text" class="form-control" id="edit_father_surname"
+                                                        name="father_surname">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="edit_father_telephone" class="form-label">Telefon</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-phone-line"></i></span>
+                                                    <input type="tel" class="form-control" id="edit_father_telephone"
+                                                        name="father_telephone">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="edit_father_email" class="form-label">Email</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i
+                                                            class="ri-mail-line"></i></span>
+                                                    <input type="email" class="form-control" id="edit_father_email"
+                                                        name="father_email">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-outline-secondary me-2"
+                                        data-bs-dismiss="modal">
+                                        <i class="ri-close-line me-1"></i>Zavřít
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ri-save-line me-1"></i>Uložit změny
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>

@@ -77,10 +77,6 @@ $(document).ready(function () {
   });
 
   $('#reccuringCheckbox').on('change', function (e) {
-    console.log('Checkbox changed:', this.checked);
-    console.log('recurrenceEndDateContainer:', document.getElementById('recurrenceEndDateContainer'));
-    console.log('repeatCountContainer:', document.getElementById('repeatCountContainer'));
-
     if (this.checked) {
       $('#recurrenceEndDate').val('');
       $('#recurrenceRepeatCount').prop('disabled', false);
@@ -145,7 +141,6 @@ $(document).ready(function () {
   });
 
   $('#recurrenceType').on('change', function () {
-    console.log('Recurrence type changed:', $(this).val());
     let recurrenceType = getInputValue('#recurrenceType');
     const recurringOptions = document.getElementById('recurringOptions');
 

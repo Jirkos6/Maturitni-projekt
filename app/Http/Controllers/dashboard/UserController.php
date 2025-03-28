@@ -161,10 +161,6 @@ class UserController extends Controller
 
       }
     }
-
-    /**
-     * Get all members assigned to a user
-     */
     public function getUserMembers($id)
     {
         $members = UserMember::where('user_id', $id)

@@ -42,7 +42,7 @@
                             <div class="avatar avatar-xl bg-white text-primary mx-auto mb-3">
                                 {{ substr($data->name, 0, 1) }}{{ substr($data->surname, 0, 1) }}
                             </div>
-                            <h4 class="mb-1">{{ $data->name }} {{ $data->surname }}</h4>
+                            <h4 class="mb-1 text-warning">{{ $data->name }} {{ $data->surname }}</h4>
                             @if ($data->nickname)
                                 <p class="mb-0 text-white opacity-75">"{{ $data->nickname }}"</p>
                             @endif
@@ -62,9 +62,6 @@
                         <div class="list-group list-group-flush mt-4">
                             @if ($data->email)
                                 <div class="list-group-item px-0 py-2 d-flex border-top-0">
-                                    <div class="avatar avatar-sm bg-primary text-primary me-3">
-                                        <i class="ri-mail-line"></i>
-                                    </div>
                                     <div>
                                         <small class="text-muted d-block">Email</small>
                                         <span>{{ $data->email }}</span>
@@ -74,9 +71,6 @@
 
                             @if ($data->telephone)
                                 <div class="list-group-item px-0 py-2 d-flex">
-                                    <div class="avatar avatar-sm bg-primary text-primary me-3">
-                                        <i class="ri-phone-line"></i>
-                                    </div>
                                     <div>
                                         <small class="text-muted d-block">Telefon</small>
                                         <span>{{ $data->telephone }}</span>
@@ -97,8 +91,8 @@
                     <div class="card-body">
                         <div class="row">
                             @if ($data->mother_name || $data->mother_surname || $data->mother_telephone || $data->mother_email)
-                                <div class="col-md-6 mb-4">
-                                    <div class="card h-100 bg-light border-0">
+                                <div class="col-md-6 mt-6">
+                                    <div class="card h-100 border-0">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center mb-3">
                                                 <div class="avatar avatar-sm bg-primary-subtle text-primary me-3">
@@ -136,8 +130,8 @@
                             @endif
 
                             @if ($data->father_name || $data->father_surname || $data->father_telephone || $data->father_email)
-                                <div class="col-md-6 mb-4">
-                                    <div class="card h-100 bg-light border-0">
+                                <div class="col-md-6 mt-6">
+                                    <div class="card h-100 border-0">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center mb-3">
                                                 <div class="avatar avatar-sm bg-primary-subtle text-primary me-3">
@@ -197,7 +191,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center ">
                         <h5 class="mb-0 text-dark">
                             <i class="ri-award-line me-2 text-primary"></i>Odborky
                             @if ($achievements->count() > 0)
@@ -206,7 +200,7 @@
                         </h5>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body mt-6">
                         @if ($achievements->count() > 0)
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                                 @foreach ($achievements as $achievement)

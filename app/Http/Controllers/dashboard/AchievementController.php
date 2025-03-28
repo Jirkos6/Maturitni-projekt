@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Achievements;
 use App\Models\MembersAchievement;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class AchievementController extends Controller
 {
@@ -50,6 +50,7 @@ class AchievementController extends Controller
             if ($request->hasFile('image')) {
                 $imageName = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
                 $imagePath = $request->file('image')->storeAs('achievements', $imageName, 'public');
+                Storage::delete('achievements/' . $achievement->image);
                 $achievement->image = $imageName;
             }
             $achievement->save();
@@ -67,10 +68,9 @@ class AchievementController extends Controller
             $achievementMembers = MembersAchievement::where('achievement_id', $id)->get();
             foreach ($achievementMembers as $a)
             {
-              error_log($a->id);
               $a->delete();
             }
-            File::delete(asset('storage/achievements/' . $achievement->image));
+            Storage::delete('achievements/' . $achievement->image);
             $achievement->delete();
             return redirect()->back()->with('success', 'Položka byla úspěšně smazána!');
         } else {

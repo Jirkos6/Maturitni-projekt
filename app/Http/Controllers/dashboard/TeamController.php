@@ -113,8 +113,6 @@ class TeamController extends Controller
                 DB::raw('GROUP_CONCAT(CONCAT(members.name, " ", members.surname) SEPARATOR ", ") as member_names')
             )
             ->whereNull('users.deleted_at')
-            ->whereNull('user_member.deleted_at')
-            ->whereNull('members.deleted_at')
             ->groupBy('users.id', 'users.name', 'users.email', 'users.surname', 'users.role')
             ->get();
 

@@ -30,7 +30,7 @@
 
             var calendar = new window.Calendar(calendarEl, {
                 plugins: [window.interaction, window.dayGridPlugin, window.timeGridPlugin, window
-                    .listPlugin, window.multiMonthPlugin, window.rrulePlugin
+                    .listPlugin, window.multiMonthPlugin
                 ],
                 selectable: 'true',
                 initialView: 'dayGridMonth',

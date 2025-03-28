@@ -193,7 +193,7 @@
                                             <th class="ps-4">Název</th>
                                             <th>Začátek</th>
                                             <th>Konec</th>
-                                            <th>Konání</th>
+                                            <th>Začátek</th>
                                             <th>Družiny</th>
                                             <th>Popis</th>
                                             <th class="text-end pe-4">Akce</th>

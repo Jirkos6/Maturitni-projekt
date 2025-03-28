@@ -6,5 +6,4 @@ return [
     App\Providers\JetstreamServiceProvider::class,
     App\Providers\MenuServiceProvider::class,
     Mailjet\LaravelMailjet\MailjetServiceProvider::class,
-
 ];
